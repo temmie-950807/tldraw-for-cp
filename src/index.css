@@ -1,0 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@600&display=swap');
+@import url('tldraw/tldraw.css');
+
+body, button, input {
+	font-family: 'Source Code Pro', sans-serif;
+}
