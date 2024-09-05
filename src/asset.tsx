@@ -2,9 +2,9 @@ import { TLUiAssetUrlOverrides } from "tldraw";
 
 export const customAssetUrls: TLUiAssetUrlOverrides = {
     icons: {
-        "array-icon": "/array-icon.svg",
-        "grid-icon": "/grid-icon.svg",
-        "graph-icon": "/graph-icon.svg",
-        "code-icon": "/code-icon.svg",
+        "array-icon": "/tldraw-for-cp/array-icon.svg",
+        "grid-icon": "/tldraw-for-cp/grid-icon.svg",
+        "graph-icon": "/tldraw-for-cp/graph-icon.svg",
+        "code-icon": "/tldraw-for-cp/code-icon.svg",
     },
 }
