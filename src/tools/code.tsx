@@ -24,15 +24,27 @@ type ICodeShapeProps = TLBaseShape<
     }
 >
 
-function AddMonaco({ h, w, theme }: { h: number, w: number, theme: string }) {
+interface CodeEditorProps {
+    h: number;
+    w: number;
+}
+
+const CodeEditor: React.FC<CodeEditorProps> = ({ h, w }) => {
     const defaultCode = ["#include <iostream>", "using namespace std;", "", "int main(){", "", "\treturn 0;", "}"].join("\n");
+    const editorOptions = {
+        fontSize: 22,
+        minimap: {enabled: false}
+    };
+
+    console.log(h, w);
     return (
         <Editor
             height={`${h}px`}
             width={`${w}px`}
             defaultLanguage="cpp"
-            theme={`vs-${theme}`}
+            theme="vs-dark"
             defaultValue={`${defaultCode}`}
+            options={editorOptions}
         />
     );
 }
@@ -75,9 +87,10 @@ export class CodeUtil extends ShapeUtil<ICodeShapeProps> {
         const tools = useTools();
         const isSelectSelected = useIsToolSelected(tools["select"])
 
+        console.log(shape.props.w, shape.props.h);
         return (
             <HTMLContainer style={{ pointerEvents: isSelectSelected ? 'all' : 'none', }}>
-                <AddMonaco h={shape.props.h} w={shape.props.w} theme={shape.props.theme} />
+                <CodeEditor w={shape.props.w} h={shape.props.h}/>
             </HTMLContainer>
         )
     }
