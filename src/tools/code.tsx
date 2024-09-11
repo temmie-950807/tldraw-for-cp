@@ -13,6 +13,7 @@ import {
     useTools,
 } from "tldraw"
 import Editor from '@monaco-editor/react';
+import "../index.css";
 
 type ICodeShapeProps = TLBaseShape<
     "vscode-editor",
@@ -33,6 +34,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ h, w }) => {
     const defaultCode = ["#include <iostream>", "using namespace std;", "", "int main(){", "", "\treturn 0;", "}"].join("\n");
     const editorOptions = {
         fontSize: 22,
+        fontFamily: 'Source Code Pro',
         minimap: {enabled: false}
     };
 
@@ -42,7 +44,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ h, w }) => {
             height={`${h}px`}
             width={`${w}px`}
             defaultLanguage="cpp"
-            theme="vs-dark"
+            theme="vs-light"
             defaultValue={`${defaultCode}`}
             options={editorOptions}
         />
