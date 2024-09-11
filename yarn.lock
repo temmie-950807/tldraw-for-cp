@@ -775,6 +775,35 @@
     lodash.isequal "^4.5.0"
     nanoid "4.0.2"
 
+"@tldraw/sync-core@2.4.6":
+  version "2.4.6"
+  resolved "https://registry.npmjs.org/@tldraw/sync-core/-/sync-core-2.4.6.tgz"
+  integrity sha512-D5X/tDoT/dOE6NGRo1FnY0kUYrAQLIO2/TpBs83BfdTx22rWUF2djBTzaz3PCZPC5BM+Famlo3hq+TPKrtcs6g==
+  dependencies:
+    "@tldraw/state" "2.4.6"
+    "@tldraw/store" "2.4.6"
+    "@tldraw/tlschema" "2.4.6"
+    "@tldraw/utils" "2.4.6"
+    lodash.isequal "^4.5.0"
+    nanoevents "^7.0.1"
+    nanoid "4.0.2"
+    ws "^8.16.0"
+
+"@tldraw/sync@^2.4.6":
+  version "2.4.6"
+  resolved "https://registry.npmjs.org/@tldraw/sync/-/sync-2.4.6.tgz"
+  integrity sha512-OgAKoC1MO/NNZFdc6kwPCIb31x7m+qoIiRhoMWVh70OSueQwLH6XGoLPxiodfB/hy+1YnsIXHcJi5N05gkHhXA==
+  dependencies:
+    "@tldraw/state" "2.4.6"
+    "@tldraw/state-react" "2.4.6"
+    "@tldraw/sync-core" "2.4.6"
+    "@tldraw/utils" "2.4.6"
+    lodash.isequal "^4.5.0"
+    nanoevents "^7.0.1"
+    nanoid "4.0.2"
+    tldraw "2.4.6"
+    ws "^8.16.0"
+
 "@tldraw/tlschema@2.4.6":
   version "2.4.6"
   resolved "https://registry.npmjs.org/@tldraw/tlschema/-/tlschema-2.4.6.tgz"
@@ -1724,6 +1753,11 @@ ms@2.1.2:
   resolved "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
+nanoevents@^7.0.1:
+  version "7.0.1"
+  resolved "https://registry.npmjs.org/nanoevents/-/nanoevents-7.0.1.tgz"
+  integrity sha512-o6lpKiCxLeijK4hgsqfR6CNToPyRU3keKyyI6uwuHRvpRTbZ0wXw51WRgyldVugZqoJfkGFrjrIenYH3bfEO3Q==
+
 nanoid@^3.3.7:
   version "3.3.7"
   resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.7.tgz"
@@ -2192,6 +2226,11 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
+
+ws@^8.16.0:
+  version "8.18.0"
+  resolved "https://registry.npmjs.org/ws/-/ws-8.18.0.tgz"
+  integrity sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==
 
 yocto-queue@^0.1.0:
   version "0.1.0"
