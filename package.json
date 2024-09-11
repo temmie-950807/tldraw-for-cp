@@ -17,10 +17,10 @@
 		"deploy": "npm run build && gh-pages -d dist"
 	},
 	"dependencies": {
+		"@monaco-editor/react": "^4.6.0",
 		"install": "^0.13.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"react-monaco-editor": "^0.56.1",
 		"tldraw": "2.4.6"
 	},
 	"devDependencies": {

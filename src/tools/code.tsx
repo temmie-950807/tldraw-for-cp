@@ -12,7 +12,7 @@ import {
     useIsToolSelected,
     useTools,
 } from "tldraw"
-import MonacoEditor from 'react-monaco-editor';
+import Editor from '@monaco-editor/react';
 
 type ICodeShapeProps = TLBaseShape<
     "vscode-editor",
@@ -24,20 +24,16 @@ type ICodeShapeProps = TLBaseShape<
     }
 >
 
-function AddMonaco({ h, w, font_size, theme }: { h: number, w: number, font_size: number, theme: string }) {
+function AddMonaco({ h, w, theme }: { h: number, w: number, theme: string }) {
     const defaultCode = ["#include <iostream>", "using namespace std;", "", "int main(){", "", "\treturn 0;", "}"].join("\n");
-    const options = {
-        fontSize: font_size,
-        minimap: { enabled: false },
-        language: "C++"
-    };
-    return (<MonacoEditor
-        height={`${h}px`}
-        width={`${w}px`}
-        options={options}
-        theme={`vs-${theme}`}
-        defaultValue={`${defaultCode}`}
-    />
+    return (
+        <Editor
+            height={`${h}px`}
+            width={`${w}px`}
+            defaultLanguage="cpp"
+            theme={`vs-${theme}`}
+            defaultValue={`${defaultCode}`}
+        />
     );
 }
 
@@ -81,7 +77,7 @@ export class CodeUtil extends ShapeUtil<ICodeShapeProps> {
 
         return (
             <HTMLContainer style={{ pointerEvents: isSelectSelected ? 'all' : 'none', }}>
-                <AddMonaco h={shape.props.h} w={shape.props.w} font_size={shape.props.font_size} theme={shape.props.theme} />
+                <AddMonaco h={shape.props.h} w={shape.props.w} theme={shape.props.theme} />
             </HTMLContainer>
         )
     }
@@ -93,6 +89,8 @@ export class CodeUtil extends ShapeUtil<ICodeShapeProps> {
 
 export class AddCode extends StateNode {
     static override id = "code"
+    static override isLockable = true
+    override shapeType = "draw"
     override onEnter = () => {
         this.editor.setCursor({ type: "cross", rotation: 0 })
     }
