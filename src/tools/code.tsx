@@ -25,12 +25,7 @@ type ICodeShapeProps = TLBaseShape<
     }
 >
 
-interface CodeEditorProps {
-    h: number;
-    w: number;
-}
-
-const CodeEditor: React.FC<CodeEditorProps> = ({ h, w }) => {
+const CodeEditor: React.FC<{h: number, w: number}> = ({ h, w }) => {
     const defaultCode = ["#include <iostream>", "using namespace std;", "", "int main(){", "", "\treturn 0;", "}"].join("\n");
     const editorOptions = {
         fontSize: 22,
@@ -38,7 +33,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ h, w }) => {
         minimap: {enabled: false}
     };
 
-    console.log(h, w);
     return (
         <Editor
             height={`${h}px`}
@@ -89,7 +83,6 @@ export class CodeUtil extends ShapeUtil<ICodeShapeProps> {
         const tools = useTools();
         const isSelectSelected = useIsToolSelected(tools["select"])
 
-        console.log(shape.props.w, shape.props.h);
         return (
             <HTMLContainer style={{ pointerEvents: isSelectSelected ? 'all' : 'none', }}>
                 <CodeEditor w={shape.props.w} h={shape.props.h}/>

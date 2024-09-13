@@ -1,4 +1,3 @@
-import { useSyncDemo } from '@tldraw/sync'
 import {
     DefaultColorStyle,
     DefaultDashStyle,
@@ -24,13 +23,11 @@ DefaultFillStyle.setDefaultValue("semi");
 DefaultDashStyle.setDefaultValue("solid");
 DefaultSizeStyle.setDefaultValue("m");
 
-export default function App({ roomId }: { roomId: string }) {
-    const store = useSyncDemo({ roomId });
+export default function App() {
     return (
         <div style={{ position: "fixed", inset: 0 }}>
             <Tldraw
-                // persistenceKey="temmieowo"
-                store={store}
+                persistenceKey="temmieowo"
                 tools={customTools}
                 initialState="select"
                 shapeUtils={customShape}
