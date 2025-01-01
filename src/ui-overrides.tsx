@@ -10,6 +10,7 @@ import {
     useIsToolSelected,
     useTools,
 } from "tldraw"
+import { CustomSharePanel } from "./tools/dialog"
 
 export const uiOverrides: TLUiOverrides = {
     //[a]
@@ -92,4 +93,5 @@ export const components: TLComponents = {
             </DefaultKeyboardShortcutsDialog>
         )
     },
+    SharePanel: CustomSharePanel,
 }

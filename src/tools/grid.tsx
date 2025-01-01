@@ -148,7 +148,6 @@ export class DrawGrid extends StateNode {
                 const h: number = userInput.result[0]
                 const w: number = userInput.result[1]
                 const based: number = userInput.based
-                console.log(h, w, based)
 
                 // 建立表格
                 const { currentPagePoint } = this.editor.inputs
