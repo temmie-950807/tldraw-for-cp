@@ -6,10 +6,43 @@ const SIZE = 100
 import { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 
+const COLOR_MAP: { [key: string]: string } = {
+    // 牆壁
+    '#': "black",
+    '@': "black",
+    '%': "black",
+
+    // 地板
+    '.': "black",
+};
+
+const FILL_MAP: { [key: string]: string } = {
+    // 牆壁
+    '#': "semi",
+    '@': "semi",
+    '%': "semi",
+
+    // 地板
+    '.': "solid",
+};
+
+const OPACITY_MAP: { [key: string]: number } = {
+    // 牆壁
+    '#': 0.1,
+    '@': 0.1,
+    '%': 0.1,
+
+    // 地板
+    '.': 1,
+};
+
 type InputType = {
     status: boolean; // false: 未成功輸入、true: 成功輸入
     based: number;
-    result: number[];
+    height: number;
+    width: number;
+    auto_color: boolean;
+    result: string[][];
 };
 
 type InputDialogProps = {
@@ -18,7 +51,8 @@ type InputDialogProps = {
 
 const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     const [based, setBased] = useState(0);
-    const [textareaValue, setTextareaValue] = useState("");
+    const [contentareaValue, setContentareaValue] = useState("");
+    const [autoColor, setAutoColor] = useState(false);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -34,22 +68,39 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     }, []);
 
     const handleOkClick = () => {
-        const userInput: string[][] = textareaValue
+        const userInput: string[][] = contentareaValue
             .split("\n")
             .map(str => str.trim().split(" "))
-            .filter(str => str.length);
-        console.log(userInput)
+            .filter(str => str.length && str[0].length);
 
         if (userInput[0].length == 2) {
+            const H = Number(userInput[0][0]);
+            const W = Number(userInput[0][1]);
+            let result: string[][] = Array.from({ length: H }, () => Array(W).fill(""));
+            
+            if (userInput.length-1==H && userInput.slice(1).every(row => row[0].length==W)) {
+                for (let i=1 ; i<=H ; i++) {
+                    for (let j=0 ; j<W ; j++) {
+                        result[i-1][j] = userInput[i][0][j];
+                    }
+                }
+            }
+
             onClose({
                 status: true,
                 based: based,
-                result: userInput[0].map(str => Number(str)),
+                height: H,
+                width: W,
+                auto_color: autoColor,
+                result: result,
             });
         } else {
             onClose({
                 status: false,
                 based: 0,
+                height: 0,
+                width: 0,
+                auto_color: false,
                 result: [],
             });
         }
@@ -59,6 +110,9 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
         onClose({
             status: false,
             based: 0,
+            height: 0,
+            width: 0,
+            auto_color: false,
             result: [],
         });
     };
@@ -85,7 +139,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                 }}
                 onClick={handleDialogClick}
             >
-                <p>index shift:</p>
+                <p>Index shift:</p>
                 <div className="slider-container">
                     <input type="range" min="-2" max="2" defaultValue="0" step="1" className="slider" style={{ width: "100%" }}
                         onChange={(e) => setBased(Number(e.target.value))}
@@ -98,13 +152,23 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                         <span>2</span>
                     </div>
                 </div>
+                <br/>
 
-                <p>row and column:</p>
-                <input
-                    width="50%"
-                    value={textareaValue}
-                    style={{ padding: "10px" }}
-                    onChange={(e) => setTextareaValue(e.target.value)}
+                <label>
+                    Enable auto color:
+                    <input
+                        type="checkbox"
+                        value={autoColor.toString()}
+                        onChange={(e) => setAutoColor(e.target.checked)}
+                    />
+                </label>
+
+                <p>Array content:</p>
+                <textarea
+                    rows={5}
+                    value={contentareaValue}
+                    style={{ padding: "10px", width: "100%", boxSizing: "border-box" }}
+                    onChange={(e) => setContentareaValue(e.target.value)}
                 />
                 <br />
                 <div style={{ display: "flex", gap: "10px" }}>
@@ -145,19 +209,22 @@ export class DrawGrid extends StateNode {
         createInputDialog().then(userInput => {
             if (userInput.status==true) {
                 // 拆解每一行的輸入
-                const h: number = userInput.result[0]
-                const w: number = userInput.result[1]
+                const H: number = userInput.height
+                const W: number = userInput.width
                 const based: number = userInput.based
-                console.log(h, w, based)
+                const content: string[][] = userInput.result
+                const autocolor: boolean = userInput.auto_color
+                console.log(H, W, based, content, autocolor)
 
                 // 建立表格
                 const { currentPagePoint } = this.editor.inputs
                 
-                for (let j=0 ; j<w ; j++){
+                for (let j=0 ; j<W ; j++){
                     this.editor.createShape({
                         type: "text",
                         x: currentPagePoint.x + SIZE * j,
                         y: currentPagePoint.y - 40,
+                        opacity: 1,
                         props: {
                             font: "mono",
                             text: (j + based).toString(),
@@ -165,24 +232,29 @@ export class DrawGrid extends StateNode {
                         },
                     })
                 }
-                for (let i=0 ; i<h ; i++){
+                for (let i=0 ; i<H ; i++){
                     this.editor.createShape({
                         type: "text",
                         x: currentPagePoint.x - 40,
                         y: currentPagePoint.y + SIZE * i,
+                        opacity: 1,
                         props: {
                             font: "mono",
                             text: (i + based).toString(),
                             color: "grey",
                         },
                     })
-                    for (let j=0 ; j<w ; j++){
+                    for (let j=0 ; j<W ; j++){
                         this.editor.createShape({
                             type: "geo",
                             x: currentPagePoint.x + SIZE * j,
                             y: currentPagePoint.y + SIZE * i,
+                            opacity: autocolor ? (OPACITY_MAP[content[i][j]] || 1) : 1,
+                            
                             props: {
-                                fill: "semi",
+                                text: content[i][j],
+                                fill: autocolor ? (FILL_MAP[content[i][j]] || "solid") : "semi",
+                                color: autocolor ? (COLOR_MAP[content[i][j]] || "black") : "black",
                                 dash: "solid",
                                 font: "mono",
                             },
