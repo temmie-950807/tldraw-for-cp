@@ -58,7 +58,11 @@ export class LatexUtil extends ShapeUtil<ILatexShape> {
     component(shape: ILatexShape) {
         return (
             <MathJaxContext>
-                <MathJax>{"\\(" + shape.props.content + "\\)"}</MathJax>
+                <MathJax>
+                    <div style={{ fontSize: "24px" }}>
+                        {"\\(" + shape.props.content + "\\)"}
+                    </div>
+                </MathJax>
             </MathJaxContext>
         )
     }
