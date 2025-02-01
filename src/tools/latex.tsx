@@ -1,4 +1,7 @@
 import {
+    DefaultColorStyle,
+    DefaultSizeStyle,
+    FONT_SIZES,
     Geometry2d,
     RecordProps,
     Rectangle2d,
@@ -6,8 +9,11 @@ import {
     StateNode,
     T,
     TLBaseShape,
+    TLDefaultColorStyle,
+    TLDefaultSizeStyle,
     TLResizeInfo,
     resizeBox,
+    useDefaultColorTheme,
 } from "tldraw"
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 import { useState, useEffect } from "react";
@@ -19,6 +25,8 @@ type ILatexShape = TLBaseShape<
     {
         w: number,
         h: number,
+        size: TLDefaultSizeStyle
+        color: TLDefaultColorStyle
         content: string
     }
 >
@@ -28,6 +36,8 @@ export class LatexUtil extends ShapeUtil<ILatexShape> {
     static override props: RecordProps<ILatexShape> = {
         w: T.number,
         h: T.number,
+        size: DefaultSizeStyle,
+        color: DefaultColorStyle,
         content: T.string,
     }
 
@@ -35,6 +45,8 @@ export class LatexUtil extends ShapeUtil<ILatexShape> {
         return {
             w: 200,
             h: 50,
+            size: "m",
+            color: "black",
             content: "",
         }
     }
@@ -56,10 +68,12 @@ export class LatexUtil extends ShapeUtil<ILatexShape> {
 	}
 
     component(shape: ILatexShape) {
+        const theme = useDefaultColorTheme()
+        
         return (
             <MathJaxContext>
                 <MathJax>
-                    <div style={{ fontSize: "24px" }}>
+                    <div style={{ fontSize: FONT_SIZES[shape.props.size], color: theme[shape.props.color].solid }}>
                         {"\\(" + shape.props.content + "\\)"}
                     </div>
                 </MathJax>
