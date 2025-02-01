@@ -25,12 +25,13 @@ type ICodeShapeProps = TLBaseShape<
     }
 >
 
-const CodeEditor: React.FC<{h: number, w: number}> = ({ h, w }) => {
+const CodeEditor: React.FC<{h: number, w: number, read: boolean}> = ({ h, w, read }) => {
     const defaultCode = ["#include <iostream>", "using namespace std;", "", "int main(){", "", "\treturn 0;", "}"].join("\n");
     const editorOptions = {
         fontSize: 22,
         fontFamily: 'Source Code Pro',
-        minimap: {enabled: false}
+        minimap: {enabled: false},
+        readOnly: read,
     };
 
     return (
@@ -63,7 +64,7 @@ export class CodeUtil extends ShapeUtil<ICodeShapeProps> {
         }
     }
 
-    override canEdit = () => false
+    override canEdit = () => true
     override canResize = () => true
     override isAspectRatioLocked = () => false
 
@@ -82,10 +83,11 @@ export class CodeUtil extends ShapeUtil<ICodeShapeProps> {
     component(shape: ICodeShapeProps) {
         const tools = useTools();
         const isSelectSelected = useIsToolSelected(tools["select"])
+        const isEditing = this.editor.getEditingShapeId() === shape.id
 
         return (
             <HTMLContainer style={{ pointerEvents: isSelectSelected ? 'all' : 'none', }}>
-                <CodeEditor w={shape.props.w} h={shape.props.h}/>
+                <CodeEditor w={shape.props.w} h={shape.props.h} read={!isEditing} />
             </HTMLContainer>
         )
     }
