@@ -7,7 +7,7 @@ import {
     StateNode,
     T,
     TLBaseShape,
-    TLOnResizeHandler,
+    TLResizeInfo,
     resizeBox,
     useIsToolSelected,
     useTools,
@@ -75,9 +75,9 @@ export class CodeUtil extends ShapeUtil<ICodeShapeProps> {
         })
     }
 
-    override onResize: TLOnResizeHandler<any> = (shape, info) => {
-        return resizeBox(shape, info)
-    }
+    override onResize(shape: any, info: TLResizeInfo<any>) {
+		return resizeBox(shape, info)
+	}
 
     component(shape: ICodeShapeProps) {
         const tools = useTools();

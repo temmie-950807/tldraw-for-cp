@@ -12,9 +12,10 @@ import { DrawArray } from "./tools/array"
 import { DrawGrid } from "./tools/grid"
 import { DrawGraph } from "./tools/graph"
 import { AddCode, CodeUtil } from "./tools/code"
+import { DrawLatex, LatexUtil } from "./tools/latex"
 
-const customTools = [DrawArray, DrawGrid, DrawGraph, AddCode]
-const customShape = [CodeUtil]
+const customTools = [DrawArray, DrawGrid, DrawGraph, AddCode, DrawLatex]
+const customShape = [CodeUtil, LatexUtil]
 
 // 設定預設調色板
 DefaultColorStyle.setDefaultValue("black");

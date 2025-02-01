@@ -58,7 +58,16 @@ export const uiOverrides: TLUiOverrides = {
             onSelect: () => {
                 editor.setCurrentTool("code")
             },
-        }
+        },
+        tools.latex = {
+            id: "latex",
+            icon: "latex-icon",
+            label: "LaTeX",
+            kbd: "l",
+            onSelect: () => {
+                editor.setCurrentTool("latex");
+            },
+        };
         return tools
     },
 }
@@ -70,6 +79,7 @@ export const components: TLComponents = {
         const isGridSelected = useIsToolSelected(tools["grid"])
         const isGraphSelected = useIsToolSelected(tools["graph"])
         const isCodeSelected = useIsToolSelected(tools["code"])
+        const isLatexSelected = useIsToolSelected(tools["latex"])
         return (
             <DefaultToolbar {...props}>
                 <DefaultToolbarContent />
@@ -77,6 +87,7 @@ export const components: TLComponents = {
                 <TldrawUiMenuItem {...tools["grid"]} isSelected={isGridSelected} />
                 <TldrawUiMenuItem {...tools["graph"]} isSelected={isGraphSelected} />
                 <TldrawUiMenuItem {...tools["code"]} isSelected={isCodeSelected} />
+                <TldrawUiMenuItem {...tools["latex"]} isSelected={isLatexSelected} />
             </DefaultToolbar>
         )
     },
@@ -89,6 +100,7 @@ export const components: TLComponents = {
                 <TldrawUiMenuItem {...tools["grid"]} />
                 <TldrawUiMenuItem {...tools["graph"]} />
                 <TldrawUiMenuItem {...tools["code"]} />
+                <TldrawUiMenuItem {...tools["latex"]} />
             </DefaultKeyboardShortcutsDialog>
         )
     },
