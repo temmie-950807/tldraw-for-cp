@@ -153,10 +153,21 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                 <textarea
                     rows={5}
                     value={contentareaValue}
-                    style={{ padding: "10px", width: "100%", boxSizing: "border-box" }}
+                    style={{ padding: "10px", width: "100%", boxSizing: "border-box", resize: "vertical", borderRadius: "6px" }}
                     onChange={(e) => setContentareaValue(e.target.value)}
                 />
                 <br />
+
+                <p>Preview:</p>
+                <MathJaxContext>
+                    <MathJax>
+                        <div style={{ fontSize: 24 }}>
+                            {"\\(" + contentareaValue + "\\)"}
+                        </div>
+                    </MathJax>
+                </MathJaxContext>
+                <br />
+
                 <div style={{ display: "flex", gap: "10px" }}>
                     <button style={{ flex: "1", height: "2em", backgroundColor: "#CCCCCC", color: "#000000", border: "0px", borderRadius: "6px" }} onClick={handleCancelClick}>Cancel</button>
                     <button style={{ flex: "1", height: "2em", backgroundColor: "#3182ED", color: "#FFFFFF", border: "0px", borderRadius: "6px" }} onClick={handleOkClick}>OK</button>
