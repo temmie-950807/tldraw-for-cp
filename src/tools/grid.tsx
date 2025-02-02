@@ -163,11 +163,12 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                     />
                 </label>
 
-                <p>Array content:</p>
+                <p>Grid content:</p>
                 <textarea
                     rows={5}
                     value={contentareaValue}
-                    style={{ padding: "10px", width: "100%", boxSizing: "border-box" }}
+                    placeholder={"3 5"+String.fromCharCode(10)+"(below is optional)"+String.fromCharCode(10)+"#####"+String.fromCharCode(10)+"#...#"+String.fromCharCode(10)+"#####"}
+                    style={{ padding: "10px", width: "100%", boxSizing: "border-box", resize: "vertical", borderRadius: "6px"}}
                     onChange={(e) => setContentareaValue(e.target.value)}
                 />
                 <br />
