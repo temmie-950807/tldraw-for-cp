@@ -153,6 +153,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                 <textarea
                     rows={5}
                     value={contentareaValue}
+                    placeholder={"\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}"}
                     style={{ padding: "10px", width: "100%", boxSizing: "border-box", resize: "vertical", borderRadius: "6px" }}
                     onChange={(e) => setContentareaValue(e.target.value)}
                 />
