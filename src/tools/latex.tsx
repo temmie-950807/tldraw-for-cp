@@ -178,7 +178,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     );
 };
 
-async function createInputDialog(): Promise<InputType> {
+let createInputDialog = async (): Promise<InputType> => {
     return new Promise<InputType>((resolve) => {
         const container = document.createElement("div");
         document.body.appendChild(container);
