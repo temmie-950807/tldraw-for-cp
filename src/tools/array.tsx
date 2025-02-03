@@ -4,19 +4,20 @@ import ReactDOM from "react-dom";
 import { StateNode, createShapeId } from "tldraw";
 import "../index.css"
 
-type InputType = {
-    status: boolean; // false: 未成功輸入、true: 成功輸入
+type InputData = {
+    isValidInput: boolean;
     based: number;
-    result: string[];
+    content: string[];
 };
 
 type InputDialogProps = {
-    onClose: (input: InputType) => void;
+    onClose: (input: InputData) => void;
 };
 
 const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     const [based, setBased] = useState(0);
     const [textareaValue, setTextareaValue] = useState("");
+    const [splitBySpace, setSplitBySpace] = useState(false);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -32,39 +33,34 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     }, []);
 
     const handleOkClick = () => {
-        const userInput: string[][] = textareaValue
-            .split("\n")
-            .map(str => str.trim().split(" "))
-            .filter(str => str.length);
+        const userInput: string = textareaValue.trim();
 
-        if (userInput.length !== 1) {
+        if (splitBySpace==false) {
+            let temp: string[] = [];
+            for (let i = 0; i < userInput.length; i++) {
+                if (userInput[i]) {
+                    temp.push(userInput[i]);
+                }
+            }
             onClose({
-                status: false,
-                based: 0,
-                result: [],
+                isValidInput: true,
+                based: based,
+                content: temp,
             });
         } else {
-            if (userInput[0].length == 1) {
-                onClose({
-                    status: true,
-                    based: based,
-                    result: userInput[0][0].split(""),
-                });
-            } else {
-                onClose({
-                    status: true,
-                    based: based,
-                    result: userInput[0],
-                });
-            }
+            onClose({
+                isValidInput: true,
+                based: based,
+                content: userInput.split(" "),
+            });
         }
     };
 
     const handleCancelClick = () => {
         onClose({
-            status: false,
+            isValidInput: false,
             based: 0,
-            result: [],
+            content: [],
         });
     };
 
@@ -103,11 +99,23 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                         <span>2</span>
                     </div>
                 </div>
+                <br />
+
+                <label>
+                    Split by space:
+                    <input
+                        type="checkbox"
+                        value={splitBySpace.toString()}
+                        onChange={(e) => setSplitBySpace(e.target.checked)}
+                    />
+                </label>
+                <br />
 
                 <p>array element:</p>
                 <input
                     width="50%"
                     value={textareaValue}
+                    placeholder={"48763"}
                     style={{ padding: "10px" }}
                     onChange={(e) => setTextareaValue(e.target.value)}
                 />
@@ -121,12 +129,12 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     );
 };
 
-let createInputDialog = async (): Promise<InputType> => {
-    return new Promise<InputType>((resolve) => {
+let createInputDialog = async (): Promise<InputData> => {
+    return new Promise<InputData>((resolve) => {
         const container = document.createElement("div");
         document.body.appendChild(container);
 
-        const handleClose = (input: InputType) => {
+        const handleClose = (input: InputData) => {
             ReactDOM.unmountComponentAtNode(container);
             document.body.removeChild(container);
             resolve(input);
@@ -136,7 +144,6 @@ let createInputDialog = async (): Promise<InputType> => {
     });
 }
 
-// 其他程式碼保持不變
 const GAP = 150;
 export class DrawArray extends StateNode {
     static override id = "array";
@@ -149,10 +156,10 @@ export class DrawArray extends StateNode {
 
     override onPointerDown = () => {
         this.editor.setCursor({ type: "pointer", rotation: 0 });
-        createInputDialog().then((userInput: InputType) => {
+        createInputDialog().then((userInput: InputData) => {
             const { currentPagePoint } = this.editor.inputs;
 
-            for (let i = 0; i < userInput.result?.length; i++) {
+            for (let i = 0; i < userInput.content?.length; i++) {
                 const rectangle_id = createShapeId();
                 this.editor.createShape({
                     id: rectangle_id,
@@ -160,9 +167,10 @@ export class DrawArray extends StateNode {
                     x: currentPagePoint.x + GAP * i,
                     y: currentPagePoint.y,
                     props: {
+                        geo: "rectangle",
                         w: 100,
                         h: 100,
-                        text: userInput.result[i],
+                        text: userInput.content[i],
                         dash: "solid",
                     },
                 });
