@@ -50,7 +50,7 @@ type InputDialogProps = {
 
 const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     const [based, setBased] = useState(0);
-    const [contentareaValue, setContentareaValue] = useState("");
+    const [textareaValue, setTextareaValue] = useState("");
     const [autoColor, setAutoColor] = useState(false);
     const [splitBySpace, setSplitBySpace] = useState(false);
 
@@ -68,7 +68,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     }, []);
 
     const handleOkClick = () => {
-        const userInput: string[][] = contentareaValue
+        const userInput: string[][] = textareaValue
             .split("\n")
             .map(str => str.trim().split(" "))
             .filter(str => str.length && str[0].length);
@@ -178,6 +178,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                         onChange={(e) => setAutoColor(e.target.checked)}
                     />
                 </label>
+                <br />
 
                 <label>
                     Split by space:
@@ -187,14 +188,15 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                         onChange={(e) => setSplitBySpace(e.target.checked)}
                     />
                 </label>
+                <br />
 
                 <p>Grid content:</p>
                 <textarea
                     rows={5}
-                    value={contentareaValue}
+                    value={textareaValue}
                     placeholder={"3 5"+String.fromCharCode(10)+"(below is optional)"+String.fromCharCode(10)+"#####"+String.fromCharCode(10)+"#...#"+String.fromCharCode(10)+"#####"}
                     style={{ padding: "10px", width: "100%", boxSizing: "border-box", resize: "vertical", borderRadius: "6px"}}
-                    onChange={(e) => setContentareaValue(e.target.value)}
+                    onChange={(e) => setTextareaValue(e.target.value)}
                 />
                 <br />
                 <div style={{ display: "flex", gap: "10px" }}>
