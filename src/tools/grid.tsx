@@ -42,6 +42,7 @@ type InputType = {
     height: number;
     width: number;
     auto_color: boolean;
+    splitBySpace: boolean;
     result: string[][];
 };
 
@@ -53,6 +54,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     const [based, setBased] = useState(0);
     const [contentareaValue, setContentareaValue] = useState("");
     const [autoColor, setAutoColor] = useState(false);
+    const [splitBySpace, setSplitBySpace] = useState(false);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -72,16 +74,28 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
             .split("\n")
             .map(str => str.trim().split(" "))
             .filter(str => str.length && str[0].length);
+        console.log("userInput", userInput);
 
         if (userInput[0].length == 2) {
             const H = Number(userInput[0][0]);
             const W = Number(userInput[0][1]);
             let result: string[][] = Array.from({ length: H }, () => Array(W).fill(""));
-            
-            if (userInput.length-1==H && userInput.slice(1).every(row => row[0].length==W)) {
-                for (let i=1 ; i<=H ; i++) {
-                    for (let j=0 ; j<W ; j++) {
-                        result[i-1][j] = userInput[i][0][j];
+
+            if (userInput.length-1==H) {
+                if (splitBySpace==false && userInput.slice(1).every(row => row[0].length==W)){
+                    for (let i=1 ; i<=H ; i++) {
+                        for (let j=0 ; j<W ; j++) {
+                            result[i-1][j] = userInput[i][0][j];
+                        }
+                    }
+                }else if (splitBySpace==true && userInput.slice(1).every(row => row.length==W)){
+                    console.log("userInput", userInput);
+                    for (let i=1 ; i<=H ; i++) {
+                        const temp: string[] = userInput[i];
+                        console.log("temp", temp);
+                        for (let j=0 ; j<W ; j++) {
+                            result[i-1][j] = temp[j];
+                        }
                     }
                 }
             }
@@ -92,6 +106,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                 height: H,
                 width: W,
                 auto_color: autoColor,
+                splitBySpace: splitBySpace,
                 result: result,
             });
         } else {
@@ -101,6 +116,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                 height: 0,
                 width: 0,
                 auto_color: false,
+                splitBySpace: false,
                 result: [],
             });
             throw new Error("Invalid input");
@@ -114,6 +130,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
             height: 0,
             width: 0,
             auto_color: false,
+            splitBySpace: false,
             result: [],
         });
     };
@@ -161,6 +178,15 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                         type="checkbox"
                         value={autoColor.toString()}
                         onChange={(e) => setAutoColor(e.target.checked)}
+                    />
+                </label>
+
+                <label>
+                    Split by space:
+                    <input
+                        type="checkbox"
+                        value={splitBySpace.toString()}
+                        onChange={(e) => setSplitBySpace(e.target.checked)}
                     />
                 </label>
 
