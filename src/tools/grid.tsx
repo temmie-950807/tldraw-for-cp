@@ -1,10 +1,8 @@
 import { StateNode } from "tldraw"
-
-const SIZE = 100
-
-// 輸入框的範本
 import { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
+
+const SQUARE_SIZE = 100
 
 const COLOR_MAP: { [key: string]: string } = {
     // 牆壁
@@ -36,18 +34,18 @@ const OPACITY_MAP: { [key: string]: number } = {
     '.': 1,
 };
 
-type InputType = {
-    status: boolean; // false: 未成功輸入、true: 成功輸入
+type InputData = {
+    isValidInput: boolean;
     based: number;
     height: number;
     width: number;
-    auto_color: boolean;
+    isColor: boolean;
     splitBySpace: boolean;
-    result: string[][];
+    content: string[][];
 };
 
 type InputDialogProps = {
-    onClose: (input: InputType) => void;
+    onClose: (input: InputData) => void;
 };
 
 const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
@@ -101,23 +99,23 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
             }
 
             onClose({
-                status: true,
+                isValidInput: true,
                 based: based,
                 height: H,
                 width: W,
-                auto_color: autoColor,
+                isColor: autoColor,
                 splitBySpace: splitBySpace,
-                result: result,
+                content: result,
             });
         } else {
             onClose({
-                status: false,
+                isValidInput: false,
                 based: 0,
                 height: 0,
                 width: 0,
-                auto_color: false,
+                isColor: false,
                 splitBySpace: false,
-                result: [],
+                content: [],
             });
             throw new Error("Invalid input");
         }
@@ -125,13 +123,13 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
 
     const handleCancelClick = () => {
         onClose({
-            status: false,
+            isValidInput: false,
             based: 0,
             height: 0,
             width: 0,
-            auto_color: false,
+            isColor: false,
             splitBySpace: false,
-            result: [],
+            content: [],
         });
     };
 
@@ -208,12 +206,12 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     );
 };
 
-let createInputDialog = async (): Promise<InputType> => {
-    return new Promise<InputType>((resolve) => {
+let createInputDialog = async (): Promise<InputData> => {
+    return new Promise<InputData>((resolve) => {
         const container = document.createElement("div");
         document.body.appendChild(container);
 
-        const handleClose = (input: InputType) => {
+        const handleClose = (input: InputData) => {
             ReactDOM.unmountComponentAtNode(container);
             document.body.removeChild(container);
             resolve(input);
@@ -235,22 +233,20 @@ export class DrawGrid extends StateNode {
     override onPointerDown = () => {
 
         createInputDialog().then(userInput => {
-            if (userInput.status==true) {
-                // 拆解每一行的輸入
-                const H: number = userInput.height
-                const W: number = userInput.width
+            if (userInput.isValidInput==true) {
+                const height: number = userInput.height
+                const width: number = userInput.width
                 const based: number = userInput.based
-                const content: string[][] = userInput.result
-                const autocolor: boolean = userInput.auto_color
-                console.log(H, W, based, content, autocolor)
+                const content: string[][] = userInput.content
+                const autocolor: boolean = userInput.isColor
 
                 // 建立表格
                 const { currentPagePoint } = this.editor.inputs
                 
-                for (let j=0 ; j<W ; j++){
+                for (let j=0 ; j<width ; j++){
                     this.editor.createShape({
                         type: "text",
-                        x: currentPagePoint.x + SIZE * j,
+                        x: currentPagePoint.x + SQUARE_SIZE * j,
                         y: currentPagePoint.y - 40,
                         opacity: 1,
                         props: {
@@ -260,11 +256,11 @@ export class DrawGrid extends StateNode {
                         },
                     })
                 }
-                for (let i=0 ; i<H ; i++){
+                for (let i=0 ; i<height ; i++){
                     this.editor.createShape({
                         type: "text",
                         x: currentPagePoint.x - 40,
-                        y: currentPagePoint.y + SIZE * i,
+                        y: currentPagePoint.y + SQUARE_SIZE * i,
                         opacity: 1,
                         props: {
                             font: "mono",
@@ -272,14 +268,15 @@ export class DrawGrid extends StateNode {
                             color: "grey",
                         },
                     })
-                    for (let j=0 ; j<W ; j++){
+                    for (let j=0 ; j<width ; j++){
                         this.editor.createShape({
                             type: "geo",
-                            x: currentPagePoint.x + SIZE * j,
-                            y: currentPagePoint.y + SIZE * i,
+                            x: currentPagePoint.x + SQUARE_SIZE * j,
+                            y: currentPagePoint.y + SQUARE_SIZE * i,
                             opacity: autocolor ? (OPACITY_MAP[content[i][j]] || 1) : 1,
                             
                             props: {
+                                geo: "rectangle",
                                 text: content[i][j],
                                 fill: autocolor ? (FILL_MAP[content[i][j]] || "solid") : "semi",
                                 color: autocolor ? (COLOR_MAP[content[i][j]] || "black") : "black",
