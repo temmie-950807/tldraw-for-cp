@@ -53,6 +53,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     const [textareaValue, setTextareaValue] = useState("");
     const [autoColor, setAutoColor] = useState(false);
     const [splitBySpace, setSplitBySpace] = useState(false);
+    const [isValidInput, setIsValidInput] = useState(true);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -67,12 +68,43 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
         };
     }, []);
 
-    const handleOkClick = () => {
+    useEffect(() => {
         const userInput: string[][] = textareaValue
             .split("\n")
             .map(str => str.trim().split(" "))
             .filter(str => str.length && str[0].length);
         console.log("userInput", userInput);
+
+        if (textareaValue.length==0) {
+            setIsValidInput(false);
+        }else{
+            if (userInput[0].length == 2) {
+                const H = Number(userInput[0][0]);
+                const W = Number(userInput[0][1]);
+                
+                if (userInput.length==1){
+                    setIsValidInput(true);
+                }else if (userInput.length-1!=H){
+                    setIsValidInput(false);
+                }else if (splitBySpace==false && userInput.slice(1).every(row => row[0].length==W)){
+                    setIsValidInput(true);
+                }else if (splitBySpace==true && userInput.slice(1).every(row => row.length==W)){
+                    setIsValidInput(true);
+                }else{
+                    setIsValidInput(false);
+                }
+            } else {
+                setIsValidInput(false);
+            }
+        }
+
+    }, [textareaValue, splitBySpace]);
+
+    const handleOkClick = () => {
+        const userInput: string[][] = textareaValue
+            .split("\n")
+            .map(str => str.trim().split(" "))
+            .filter(str => str.length && str[0].length);
 
         if (userInput[0].length == 2) {
             const H = Number(userInput[0][0]);
@@ -117,7 +149,6 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                 splitBySpace: false,
                 content: [],
             });
-            throw new Error("Invalid input");
         }
     };
 
@@ -198,6 +229,9 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                     style={{ padding: "10px", width: "100%", boxSizing: "border-box", resize: "vertical", borderRadius: "6px"}}
                     onChange={(e) => setTextareaValue(e.target.value)}
                 />
+                <br />
+
+                {isValidInput ? <p style={{ color: "green" }}>Valid</p> : <p style={{ color: "red" }}>Invalid</p>}
                 <br />
                 <div style={{ display: "flex", gap: "10px" }}>
                     <button style={{ flex: "1", height: "2em", backgroundColor: "#CCCCCC", color: "#000000", border: "0px", borderRadius: "6px" }} onClick={handleCancelClick}>Cancel</button>
