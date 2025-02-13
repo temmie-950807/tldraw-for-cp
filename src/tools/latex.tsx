@@ -20,20 +20,19 @@ import { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import "../index.css";
 
-type ILatexShape = TLBaseShape<
-    "latex-text",
-    {
-        w: number,
-        h: number,
-        size: TLDefaultSizeStyle
-        color: TLDefaultColorStyle
-        content: string
-    }
->
+interface LatexShapeProps {
+    w: number
+    h: number
+    size: TLDefaultSizeStyle
+    color: TLDefaultColorStyle
+    content: string
+}
 
-export class LatexUtil extends ShapeUtil<ILatexShape> {
+type LatexShape = TLBaseShape<"latex-text", LatexShapeProps>
+
+export class LatexUtil extends ShapeUtil<LatexShape> {
     static override type = "latex-text" as const
-    static override props: RecordProps<ILatexShape> = {
+    static override props: RecordProps<LatexShape> = {
         w: T.number,
         h: T.number,
         size: DefaultSizeStyle,
@@ -41,7 +40,7 @@ export class LatexUtil extends ShapeUtil<ILatexShape> {
         content: T.string,
     }
 
-    getDefaultProps(): ILatexShape["props"] {
+    getDefaultProps(): LatexShape["props"] {
         return {
             w: 200,
             h: 50,
@@ -55,7 +54,7 @@ export class LatexUtil extends ShapeUtil<ILatexShape> {
     override canResize = () => true
     override isAspectRatioLocked = () => false
 
-    getGeometry(shape: ILatexShape): Geometry2d {
+    getGeometry(shape: LatexShape): Geometry2d {
         return new Rectangle2d({
             width: shape.props.w,
             height: shape.props.h,
@@ -67,7 +66,7 @@ export class LatexUtil extends ShapeUtil<ILatexShape> {
 		return resizeBox(shape, info)
 	}
 
-    component(shape: ILatexShape) {
+    component(shape: LatexShape) {
         const theme = useDefaultColorTheme()
         
         return (
@@ -81,7 +80,7 @@ export class LatexUtil extends ShapeUtil<ILatexShape> {
         )
     }
 
-    indicator(shape: ILatexShape) {
+    indicator(shape: LatexShape) {
         return <rect width={shape.props.w} height={shape.props.h} />
     }
 }
