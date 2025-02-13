@@ -1,88 +1,390 @@
 import {
     DefaultColorStyle,
+    DefaultFontStyle,
     DefaultSizeStyle,
+    DefaultTextAlignStyle,
+    Editor,
+    FONT_FAMILIES,
     FONT_SIZES,
-    Geometry2d,
     RecordProps,
     Rectangle2d,
     ShapeUtil,
     StateNode,
     T,
+    TEXT_PROPS,
     TLBaseShape,
     TLDefaultColorStyle,
+    TLDefaultFontStyle,
     TLDefaultSizeStyle,
+    TLDefaultTextAlignStyle,
     TLResizeInfo,
-    resizeBox,
+    TLShapeId,
+    TextLabel,
+    Vec,
+    WeakCache,
+    toDomPrecision,
     useDefaultColorTheme,
+    useEditor,
 } from "tldraw"
 import { MathJax, MathJaxContext } from "better-react-mathjax";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import "../index.css";
 
 interface LatexShapeProps {
-    w: number
-    h: number
-    size: TLDefaultSizeStyle
     color: TLDefaultColorStyle
-    content: string
+    size: TLDefaultSizeStyle
+    font: TLDefaultFontStyle
+    textAlign: TLDefaultTextAlignStyle
+    w: number
+    text: string
+    scale: number
+    autoSize: boolean
 }
 
 type LatexShape = TLBaseShape<"latex-text", LatexShapeProps>
+const sizeCache = new WeakCache<LatexShape['props'], { height: number; width: number }>()
 
 export class LatexUtil extends ShapeUtil<LatexShape> {
     static override type = "latex-text" as const
     static override props: RecordProps<LatexShape> = {
-        w: T.number,
-        h: T.number,
-        size: DefaultSizeStyle,
         color: DefaultColorStyle,
-        content: T.string,
+        size: DefaultSizeStyle,
+        font: DefaultFontStyle,
+        textAlign: DefaultTextAlignStyle,
+        w: T.nonZeroNumber,
+        text: T.string,
+        scale: T.nonZeroNumber,
+        autoSize: T.boolean,
     }
 
     getDefaultProps(): LatexShape["props"] {
         return {
-            w: 200,
-            h: 50,
-            size: "m",
             color: "black",
-            content: "",
+            size: "m",
+            font: "draw",
+            textAlign: "start",
+            w: 80,
+            text: "",
+            scale: 1,
+            autoSize: true,
         }
     }
 
-    override canEdit = () => false
-    override canResize = () => true
-    override isAspectRatioLocked = () => false
+    getMinDimensions(shape: LatexShape) {
+        return sizeCache.get(shape.props, () => getTextSize(this.editor, shape.props))
+    }
 
-    getGeometry(shape: LatexShape): Geometry2d {
+    getGeometry(shape: LatexShape) {
+        const { scale } = shape.props
+        const { width, height } = this.getMinDimensions(shape)!
         return new Rectangle2d({
-            width: shape.props.w,
-            height: shape.props.h,
-            isFilled: true,
+            width: width * scale,
+            height: height * scale,
+            isFilled: true, // 不知道在幹嘛
+            isLabel: true, // 不知道在幹嘛
         })
     }
 
-    override onResize(shape: any, info: TLResizeInfo<any>) {
-		return resizeBox(shape, info)
-	}
+    override getText(shape: LatexShape) {
+        return shape.props.text
+    }
+
+    override canEdit() {
+        return true
+    }
+
+    override isAspectRatioLocked() {
+        return true
+    } // WAIT NO THIS IS HARD CODED IN THE RESIZE HANDLER
+
+    override onResize(shape: LatexShape, info: TLResizeInfo<LatexShape>) {
+        const { newPoint, initialBounds, initialShape, scaleX, handle } = info
+
+        if (info.mode === 'scale_shape' || (handle !== 'right' && handle !== 'left')) {
+            return {
+                id: shape.id,
+                type: shape.type,
+                ...resizeScaled(shape, info),
+            }
+        } else {
+            const nextWidth = Math.max(1, Math.abs(initialBounds.width * scaleX))
+            const { x, y } =
+                scaleX < 0 ? Vec.Sub(newPoint, Vec.FromAngle(shape.rotation).mul(nextWidth)) : newPoint
+
+            return {
+                id: shape.id,
+                type: shape.type,
+                x,
+                y,
+                props: {
+                    w: nextWidth / initialShape.props.scale,
+                    autoSize: false,
+                },
+            }
+        }
+    }
+
+    override onEditEnd(shape: LatexShape) {
+        const {
+            id,
+            type,
+            props: { text },
+        } = shape
+
+        const trimmedText = shape.props.text.trimEnd()
+
+        if (trimmedText.length === 0) {
+            this.editor.deleteShapes([shape.id])
+        } else {
+            if (trimmedText !== shape.props.text) {
+                this.editor.updateShapes([
+                    {
+                        id,
+                        type,
+                        props: {
+                            text: text.trimEnd(),
+                        },
+                    },
+                ])
+            }
+        }
+    }
+
+    override onBeforeUpdate(prev: LatexShape, next: LatexShape) {
+        if (!next.props.autoSize) return
+
+        const styleDidChange =
+            prev.props.size !== next.props.size ||
+            prev.props.textAlign !== next.props.textAlign ||
+            prev.props.font !== next.props.font ||
+            (prev.props.scale !== 1 && next.props.scale === 1)
+
+        const textDidChange = prev.props.text !== next.props.text
+
+        // Only update position if either changed
+        if (!styleDidChange && !textDidChange) return
+
+        // Might return a cached value for the bounds
+        const boundsA = this.getMinDimensions(prev)
+
+        // Will always be a fresh call to getTextSize
+        const boundsB = getTextSize(this.editor, next.props)
+
+        const wA = boundsA.width * prev.props.scale
+        const hA = boundsA.height * prev.props.scale
+        const wB = boundsB.width * next.props.scale
+        const hB = boundsB.height * next.props.scale
+
+        let delta: Vec | undefined
+
+        switch (next.props.textAlign) {
+            case 'middle': {
+                delta = new Vec((wB - wA) / 2, textDidChange ? 0 : (hB - hA) / 2)
+                break
+            }
+            case 'end': {
+                delta = new Vec(wB - wA, textDidChange ? 0 : (hB - hA) / 2)
+                break
+            }
+            default: {
+                if (textDidChange) break
+                delta = new Vec(0, (hB - hA) / 2)
+                break
+            }
+        }
+
+        if (delta) {
+            // account for shape rotation when writing text:
+            delta.rot(next.rotation)
+            const { x, y } = next
+            return {
+                ...next,
+                x: x - delta.x,
+                y: y - delta.y,
+                props: { ...next.props, w: wB },
+            }
+        } else {
+            return {
+                ...next,
+                props: { ...next.props, w: wB },
+            }
+        }
+    }
 
     component(shape: LatexShape) {
+        const {
+            id,
+            props: { font, size, text, color, scale, textAlign },
+        } = shape
+
+        const { width, height } = this.getMinDimensions(shape)
+        const isSelected = id === this.editor.getOnlySelectedShapeId()
+        const isEditing = id === this.editor.getEditingShapeId()
         const theme = useDefaultColorTheme()
-        
-        return (
-            <MathJaxContext>
-                <MathJax>
-                    <div style={{ fontSize: FONT_SIZES[shape.props.size], color: theme[shape.props.color].solid }}>
-                        {"\\(" + shape.props.content + "\\)"}
-                    </div>
-                </MathJax>
-            </MathJaxContext>
-        )
+        const handleKeyDown = useTextShapeKeydownHandler(id)
+
+        if (isEditing) {
+            return (
+                <TextLabel
+                    shapeId={id}
+                    classNamePrefix="latex-shape"
+                    type="text"
+                    font={font}
+                    fontSize={FONT_SIZES[size]}
+                    lineHeight={TEXT_PROPS.lineHeight}
+                    align={textAlign}
+                    verticalAlign="middle"
+                    text={text}
+                    labelColor={theme[color].solid}
+                    isSelected={isSelected}
+                    textWidth={width}
+                    textHeight={height}
+                    style={{
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'top left',
+                    }}
+                    wrap
+                    onKeyDown={handleKeyDown}
+                >
+                </TextLabel>
+            )
+        } else {
+            return (
+                <MathJaxContext>
+                    <MathJax>
+                        <div style={{ fontSize: FONT_SIZES[size] * scale, color: theme[color].solid }}>
+                            {"\\(" + text + "\\)"}
+                        </div>
+                    </MathJax>
+                </MathJaxContext>
+            )
+        }
     }
 
     indicator(shape: LatexShape) {
-        return <rect width={shape.props.w} height={shape.props.h} />
+        const bounds = this.editor.getShapeGeometry(shape).bounds
+        const editor = useEditor()
+        if (shape.props.autoSize && editor.getEditingShapeId() === shape.id) return null
+        return <rect width={toDomPrecision(bounds.width)} height={toDomPrecision(bounds.height)} />
     }
+}
+
+function getTextSize(editor: Editor, props: LatexShape["props"]) {
+
+    const { font, text, autoSize, size, w } = props
+
+    const minWidth = autoSize ? 16 : Math.max(16, w)
+    const fontSize = FONT_SIZES[size]
+
+    const cw = autoSize
+        ? null
+        : // `measureText` floors the number so we need to do the same here to avoid issues.
+            Math.floor(Math.max(minWidth, w))
+
+    const result = editor.textMeasure.measureText(text, {
+        ...TEXT_PROPS,
+        fontFamily: FONT_FAMILIES[font],
+        fontSize: fontSize,
+        maxWidth: cw,
+    })
+
+    // If we're autosizing the measureText will essentially `Math.floor`
+    // the numbers so `19` rather than `19.3`, this means we must +1 to
+    // whatever we get to avoid wrapping.
+    if (autoSize) {
+        result.w += 1
+    }
+
+    return {
+        width: Math.max(minWidth, result.w),
+        height: Math.max(fontSize, result.h),
+    }
+}
+
+function resizeScaled(
+    shape: TLBaseShape<any, { scale: number }>,
+    { initialBounds, scaleX, scaleY, newPoint, handle }: TLResizeInfo<any>
+) {
+    let scaleDelta: number
+    switch (handle) {
+        case 'bottom_left':
+        case 'bottom_right':
+        case 'top_left':
+        case 'top_right': {
+            scaleDelta = Math.max(0.01, Math.max(Math.abs(scaleX), Math.abs(scaleY)))
+            break
+        }
+        case 'left':
+        case 'right': {
+            scaleDelta = Math.max(0.01, Math.abs(scaleX))
+            break
+        }
+        case 'bottom':
+        case 'top': {
+            scaleDelta = Math.max(0.01, Math.abs(scaleY))
+            break
+        }
+        default: {
+            throw exhaustiveSwitchError(handle)
+        }
+    }
+
+    // Compute the offset (if flipped X or flipped Y)
+    const offset = new Vec(0, 0)
+
+    if (scaleX < 0) {
+        offset.x = -(initialBounds.width * scaleDelta)
+    }
+    if (scaleY < 0) {
+        offset.y = -(initialBounds.height * scaleDelta)
+    }
+
+    // Apply the offset to the new point
+    const { x, y } = Vec.Add(newPoint, offset.rot(shape.rotation))
+
+    return {
+        x,
+        y,
+        props: {
+            scale: scaleDelta * shape.props.scale,
+        },
+    }
+}
+
+function useTextShapeKeydownHandler(id: TLShapeId) {
+    const editor = useEditor()
+
+    return useCallback(
+        (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+            if (editor.getEditingShapeId() !== id) return
+
+            switch (e.key) {
+                case 'Enter': {
+                    if (e.ctrlKey || e.metaKey) {
+                        editor.complete()
+                    }
+                    break
+                }
+                // case 'Tab': {
+                //     preventDefault(e)
+                //     if (e.shiftKey) {
+                //         TextHelpers.unindent(e.currentTarget)
+                //     } else {
+                //         TextHelpers.indent(e.currentTarget)
+                //     }
+                //     break
+                // }
+            }
+        },
+        [editor, id]
+    )
+}
+
+function exhaustiveSwitchError(value: never, property?: string): never {
+	const debugValue =
+		property && value && typeof value === 'object' && property in value ? value[property] : value
+	throw new Error(`Unknown switch case ${debugValue}`)
 }
 
 type InputType = {
@@ -206,7 +508,7 @@ export class DrawLatex extends StateNode {
             if (userInput.status) {
                 const { currentPagePoint } = this.editor.inputs;
                 
-                this.editor.createShape({ type: "latex-text", x: currentPagePoint.x, y: currentPagePoint.y, props: { content: userInput.result } });
+                this.editor.createShape({ type: "latex-text", x: currentPagePoint.x, y: currentPagePoint.y, props: { text: userInput.result } });
             }
         });
     }
