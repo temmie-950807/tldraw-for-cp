@@ -12,7 +12,8 @@ import { DrawArray } from "./tools/array"
 import { DrawGrid } from "./tools/grid"
 import { DrawGraph } from "./tools/graph"
 import { AddCode, CodeUtil } from "./tools/code"
-import { DrawLatex, LatexUtil } from "./tools/latex"
+import { DrawLatex } from "./tools/latex/LatexShapeTool"
+import { LatexUtil } from "./tools/latex/LatexShapeUtil"
 
 const customTools = [DrawArray, DrawGrid, DrawGraph, AddCode, DrawLatex]
 const customShape = [CodeUtil, LatexUtil]
