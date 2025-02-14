@@ -22,7 +22,6 @@ import {
     TextLabel,
     Vec,
     WeakCache,
-    toDomPrecision,
     useDefaultColorTheme,
     useEditor,
 } from "tldraw"
