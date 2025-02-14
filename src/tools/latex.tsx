@@ -263,10 +263,18 @@ export class LatexUtil extends ShapeUtil<LatexShape> {
     }
 
     indicator(shape: LatexShape) {
-        const bounds = this.editor.getShapeGeometry(shape).bounds
+        const { id } = shape
+        const element_width: any = document.querySelector(`[data-shape-id="${id}"] > span > div > mjx-container`)
+        const element_height: any = document.querySelector(`[data-shape-id="${id}"] > span`)
+
+        if (element_height === null || element_width === null) return null
+
+        const width = element_width.getBoundingClientRect().width
+        const height = element_height.getBoundingClientRect().height
+
         const editor = useEditor()
         if (shape.props.autoSize && editor.getEditingShapeId() === shape.id) return null
-        return <rect width={toDomPrecision(bounds.width)} height={toDomPrecision(bounds.height)} />
+        return <rect width={toDomPrecision(width)} height={toDomPrecision(height)} />
     }
 }
 
