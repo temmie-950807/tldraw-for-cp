@@ -76,11 +76,24 @@ export class LatexUtil extends ShapeUtil<LatexShape> {
     }
 
     getGeometry(shape: LatexShape) {
-        const { scale } = shape.props
-        const { width, height } = this.getMinDimensions(shape)!
+        const { id } = shape
+        const element_width: any = document.querySelector(`[data-shape-id="${id}"] > span > div > mjx-container`)
+        const element_height: any = document.querySelector(`[data-shape-id="${id}"] > span`)
+
+        if (element_height === null || element_width === null) {
+            return new Rectangle2d({
+                width: 50,
+                height: 50,
+                isFilled: true, // 不知道在幹嘛
+                isLabel: true, // 不知道在幹嘛
+            })
+        }
+        
+        const width = element_width.getBoundingClientRect().width
+        const height = element_height.getBoundingClientRect().height
         return new Rectangle2d({
-            width: width * scale,
-            height: height * scale,
+            width: width,
+            height: height,
             isFilled: true, // 不知道在幹嘛
             isLabel: true, // 不知道在幹嘛
         })
@@ -274,7 +287,7 @@ export class LatexUtil extends ShapeUtil<LatexShape> {
 
         const editor = useEditor()
         if (shape.props.autoSize && editor.getEditingShapeId() === shape.id) return null
-        return <rect width={toDomPrecision(width)} height={toDomPrecision(height)} />
+        return <rect width={width} height={height} />
     }
 }
 
