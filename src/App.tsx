@@ -14,8 +14,9 @@ import { DrawGraph } from "./tools/graph"
 import { AddCode, CodeUtil } from "./tools/code"
 import { DrawLatex } from "./tools/latex/LatexShapeTool"
 import { LatexUtil } from "./tools/latex/LatexShapeUtil"
+import { DrawAi } from "./tools/ai/ai"
 
-const customTools = [DrawArray, DrawGrid, DrawGraph, AddCode, DrawLatex]
+const customTools = [DrawArray, DrawGrid, DrawGraph, AddCode, DrawLatex, DrawAi]
 const customShape = [CodeUtil, LatexUtil]
 
 // 設定預設調色板

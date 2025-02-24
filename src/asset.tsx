@@ -7,5 +7,6 @@ export const customAssetUrls: TLUiAssetUrlOverrides = {
         "graph-icon": "/tldraw-for-cp/graph-icon.svg",
         "code-icon": "/tldraw-for-cp/code-icon.svg",
         "latex-icon": "/tldraw-for-cp/latex-icon.svg",
+        "ai-icon": "/tldraw-for-cp/ai-icon.svg",
     },
 }
