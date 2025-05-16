@@ -179,15 +179,17 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                 {graphType === "任意圖" ? (
                     <>
                         <p>圖形結構：</p>
-                        <input
+                        <textarea
                             value={textareaValue}
-                            placeholder={"v0\nv1\nv0 v1"}
+                            placeholder={"u v w\nu v\nu"}
                             style={{ 
                                 padding: "10px",
                                 width: "100%",
+                                height: "150px",
                                 boxSizing: "border-box",
                                 borderRadius: "6px",
-                                border: "1px solid #ccc"
+                                border: "1px solid #ccc",
+                                resize: "vertical"
                             }}
                             onChange={(e) => setTextareaValue(e.target.value)}
                         />
