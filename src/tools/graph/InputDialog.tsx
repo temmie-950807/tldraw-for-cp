@@ -4,7 +4,6 @@ import ReactDOM from "react-dom";
 export type InputType = {
     status: boolean; // false: 未成功輸入、true: 成功輸入
     result: string[][];
-    autoLayout: boolean; // 是否啟用自動佈局
 };
 
 type GraphType = "任意圖" | "K_n" | "K_{n,m}" | "C_n" | "P_n";
@@ -15,7 +14,6 @@ type InputDialogProps = {
 
 const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     const [textareaValue, setTextareaValue] = useState("");
-    const [autoLayout, setAutoLayout] = useState(false);
     const [graphType, setGraphType] = useState<GraphType>("任意圖");
     const [n, setN] = useState<number>(3);
     const [m, setM] = useState<number>(3);
@@ -102,13 +100,11 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
             onClose({
                 status: false,
                 result: [],
-                autoLayout: false,
             });
         } else {
             onClose({
                 status: true,
                 result: userInput,
-                autoLayout,
             });
         }
     };
@@ -117,7 +113,6 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
         onClose({
             status: false,
             result: [],
-            autoLayout: false,
         });
     };
 
@@ -175,8 +170,9 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                             n: <input
                                 type="number"
                                 min="1"
+                                max="20"
                                 value={n}
-                                onChange={(e) => setN(Math.max(1, parseInt(e.target.value) || 1))}
+                                onChange={(e) => setN(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
                                 style={{ width: "60px", padding: "5px" }}
                             />
                         </label>
@@ -185,25 +181,15 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                                 m: <input
                                     type="number"
                                     min="1"
+                                    max="20"
                                     value={m}
-                                    onChange={(e) => setM(Math.max(1, parseInt(e.target.value) || 1))}
+                                    onChange={(e) => setM(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
                                     style={{ width: "60px", padding: "5px" }}
                                 />
                             </label>
                         )}
                     </div>
                 )}
-
-                <div style={{ margin: "10px 0" }}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={autoLayout}
-                            onChange={(e) => setAutoLayout(e.target.checked)}
-                        />
-                        啟用自動佈局
-                    </label>
-                </div>
 
                 <div style={{ display: "flex", gap: "10px" }}>
                     <button style={{ flex: "1", height: "2em", backgroundColor: "#CCCCCC", color: "#000000", border: "0px", borderRadius: "6px" }} onClick={handleCancelClick}>Cancel</button>
