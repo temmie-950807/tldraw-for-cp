@@ -29,7 +29,8 @@
 		"mathjax": "^3.2.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"tldraw": "^3.7.2"
+		"tldraw": "^3.7.2",
+		"webcola": "^3.4.0"
 	},
 	"devDependencies": {
 		"@types/node": "^22.13.5",
