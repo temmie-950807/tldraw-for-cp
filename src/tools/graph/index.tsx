@@ -1,4 +1,4 @@
-import { StateNode, createShapeId } from "tldraw";
+import { Editor, StateNode, TLArrowBinding, TLArrowShape, TLShapeId, Vec, createShapeId } from "tldraw";
 import { createInputDialog } from "./InputDialog";
 import { OFFSET, GAP } from "./constants";
 
@@ -15,11 +15,11 @@ export class DrawGraph extends StateNode {
         createInputDialog().then(userInput => {
             if (userInput.status==true) {
                 // 拆解每一行的輸入
-                let graph_structure: String[][] = userInput.result
+                let graph_structure: string[][] = userInput.result
 
                 // 把 node 跟 edge 提取出來（node 去重）
-                let node: String[] = [];
-                let edge: String[][] = [];
+                let node: string[] = [];
+                let edge: string[][] = [];
                 for (let i = 0; i < graph_structure.length; i++) {
                     if (graph_structure[i].length == 1) {
                         node.push(graph_structure[i][0]);
@@ -57,58 +57,123 @@ export class DrawGraph extends StateNode {
                 // 建立 edge
                 if (edge.length > 0) {
                     for (let i = 0; i < edge.length; i++) {
-                        let arrow_id = createShapeId();
-
                         if (edge[i].length == 2) {
-                            this.editor.createShape({
-                                id: arrow_id,
-                                type: "arrow",
-                                props: {
-                                    fill: "semi",
-                                    dash: "solid",
-                                    font: "mono",
-                                },
-                            });
+                            createTextArrowBetweenShapes(this.editor, node_id.get(edge[i][0]), node_id.get(edge[i][1]), "");
                         } else {
-                            this.editor.createShape({
-                                id: arrow_id,
-                                type: "arrow",
-                                props: {
-                                    text: edge[i][2],
-                                    fill: "semi",
-                                    dash: "solid",
-                                    font: "mono",
-                                },
-                            });
+                            createTextArrowBetweenShapes(this.editor, node_id.get(edge[i][0]), node_id.get(edge[i][1]), edge[i][2]);
                         }
-
-                        this.editor.createBindings([
-                            {
-                                type: "arrow",
-                                fromId: arrow_id,
-                                toId: node_id.get(edge[i][0]),
-                                props: {
-                                    terminal: "start",
-                                    isExact: false,
-                                    normalizedAnchor: { x: 0.5, y: 0.5 },
-                                    isPrecise: false
-                                }
-                            },
-                            {
-                                type: "arrow",
-                                fromId: arrow_id,
-                                toId: node_id.get(edge[i][1]),
-                                props: {
-                                    terminal: "end",
-                                    isExact: false,
-                                    normalizedAnchor: { x: 0.5, y: 0.5 },
-                                    isPrecise: false
-                                }
-                            },
-                        ]);
                     }
                 }
             }
         });
     }
 } 
+
+// modify from https://github.com/tldraw/tldraw/blob/main/apps/examples/src/examples/create-arrow/CreateArrowExample.tsx
+function createTextArrowBetweenShapes(
+	editor: Editor,
+	startShapeId: TLShapeId,
+	endShapeId: TLShapeId,
+	text: string,
+	options = {} as {
+		parentId?: TLShapeId
+		start?: Partial<Omit<TLArrowBinding['props'], 'terminal'>>
+		end?: Partial<Omit<TLArrowBinding['props'], 'terminal'>>
+	}
+) {
+	const { start = {}, end = {}, parentId } = options
+
+	const {
+		normalizedAnchor: startNormalizedAnchor = { x: 0.5, y: 0.5 },
+		isExact: startIsExact = false,
+		isPrecise: startIsPrecise = false,
+	} = start
+	const {
+		normalizedAnchor: endNormalizedAnchor = { x: 0.5, y: 0.5 },
+		isExact: endIsExact = false,
+		isPrecise: endIsPrecise = false,
+	} = end
+
+	const startTerminalNormalizedPosition = Vec.From(startNormalizedAnchor)
+	const endTerminalNormalizedPosition = Vec.From(endNormalizedAnchor)
+
+	const parent = parentId ? editor.getShape(parentId) : undefined
+	if (parentId && !parent) throw Error(`Parent shape with id ${parentId} not found`)
+
+	const startShapePageBounds = editor.getShapePageBounds(startShapeId)
+	const endShapePageBounds = editor.getShapePageBounds(endShapeId)
+
+	const startShapePageRotation = editor.getShapePageTransform(startShapeId).rotation()
+	const endShapePageRotation = editor.getShapePageTransform(endShapeId).rotation()
+
+	if (!startShapePageBounds || !endShapePageBounds) return
+
+	const startTerminalPagePosition = Vec.Add(
+		startShapePageBounds.point,
+		Vec.MulV(
+			startShapePageBounds.size,
+			Vec.Rot(startTerminalNormalizedPosition, startShapePageRotation)
+		)
+	)
+	const endTerminalPagePosition = Vec.Add(
+		endShapePageBounds.point,
+		Vec.MulV(
+			startShapePageBounds.size,
+			Vec.Rot(endTerminalNormalizedPosition, endShapePageRotation)
+		)
+	)
+
+	const arrowPointInParentSpace = Vec.Min(startTerminalPagePosition, endTerminalPagePosition)
+	if (parent) {
+		arrowPointInParentSpace.setTo(
+			editor.getShapePageTransform(parent.id)!.applyToPoint(arrowPointInParentSpace)
+		)
+	}
+
+	const arrowId = createShapeId()
+	editor.run(() => {
+		editor.markHistoryStoppingPoint('creating_arrow')
+		editor.createShape<TLArrowShape>({
+			id: arrowId,
+			type: 'arrow',
+			x: arrowPointInParentSpace.x,
+			y: arrowPointInParentSpace.y,
+			props: {
+				text: text,
+				start: {
+					x: arrowPointInParentSpace.x - startTerminalPagePosition.x,
+					y: arrowPointInParentSpace.x - startTerminalPagePosition.x,
+				},
+				end: {
+					x: arrowPointInParentSpace.x - endTerminalPagePosition.x,
+					y: arrowPointInParentSpace.x - endTerminalPagePosition.x,
+				},
+			},
+		})
+
+		editor.createBindings<TLArrowBinding>([
+			{
+				fromId: arrowId,
+				toId: startShapeId,
+				type: 'arrow',
+				props: {
+					terminal: 'start',
+					normalizedAnchor: startNormalizedAnchor,
+					isExact: startIsExact,
+					isPrecise: startIsPrecise,
+				},
+			},
+			{
+				fromId: arrowId,
+				toId: endShapeId,
+				type: 'arrow',
+				props: {
+					terminal: 'end',
+					normalizedAnchor: endNormalizedAnchor,
+					isExact: endIsExact,
+					isPrecise: endIsPrecise,
+				},
+			},
+		])
+	})
+}
