@@ -147,7 +147,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                     >
                         <option value="任意圖">任意圖</option>
                         <option value="K_n">K_n（完全圖）</option>
-                        <option value="K_{n,m}">K_{n,m}（二分圖）</option>
+                        <option value="K_{n,m}">K_n,m（二分圖）</option>
                         <option value="C_n">C_n（環）</option>
                         <option value="P_n">P_n（鍊）</option>
                     </select>
