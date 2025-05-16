@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 export type InputType = {
     status: boolean; // false: 未成功輸入、true: 成功輸入
     result: string[][];
+    isDirected: boolean; // 是否為有向圖
 };
 
 type GraphType = "任意圖" | "K_n" | "K_{n,m}" | "C_n" | "P_n";
@@ -17,6 +18,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
     const [graphType, setGraphType] = useState<GraphType>("任意圖");
     const [n, setN] = useState<number>(3);
     const [m, setM] = useState<number>(3);
+    const [isDirected, setIsDirected] = useState<boolean>(false);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -100,11 +102,13 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
             onClose({
                 status: false,
                 result: [],
+                isDirected: isDirected
             });
         } else {
             onClose({
                 status: true,
                 result: userInput,
+                isDirected: isDirected
             });
         }
     };
@@ -113,6 +117,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
         onClose({
             status: false,
             result: [],
+            isDirected: isDirected
         });
     };
 
@@ -155,6 +160,21 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                     <option value="C_n">C_n（環）</option>
                     <option value="P_n">P_n（鍊）</option>
                 </select>
+
+                <label style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    marginBottom: "10px",
+                    cursor: "pointer"
+                }}>
+                    <input
+                        type="checkbox"
+                        checked={isDirected}
+                        onChange={(e) => setIsDirected(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                    />
+                    使用有向邊
+                </label>
 
                 {graphType === "任意圖" ? (
                     <>

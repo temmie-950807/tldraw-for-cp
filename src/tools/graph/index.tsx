@@ -58,9 +58,9 @@ export class DrawGraph extends StateNode {
                 if (edge.length > 0) {
                     for (let i = 0; i < edge.length; i++) {
                         if (edge[i].length == 2) {
-                            createTextArrowBetweenShapes(this.editor, node_id.get(edge[i][0]), node_id.get(edge[i][1]), "");
+                            createTextArrowBetweenShapes(this.editor, node_id.get(edge[i][0]), node_id.get(edge[i][1]), "", userInput.isDirected);
                         } else {
-                            createTextArrowBetweenShapes(this.editor, node_id.get(edge[i][0]), node_id.get(edge[i][1]), edge[i][2]);
+                            createTextArrowBetweenShapes(this.editor, node_id.get(edge[i][0]), node_id.get(edge[i][1]), edge[i][2], userInput.isDirected);
                         }
                     }
                 }
@@ -75,6 +75,7 @@ function createTextArrowBetweenShapes(
 	startShapeId: TLShapeId,
 	endShapeId: TLShapeId,
 	text: string,
+	isDirected: boolean,
 	options = {} as {
 		parentId?: TLShapeId
 		start?: Partial<Omit<TLArrowBinding['props'], 'terminal'>>
@@ -148,6 +149,7 @@ function createTextArrowBetweenShapes(
 					x: arrowPointInParentSpace.x - endTerminalPagePosition.x,
 					y: arrowPointInParentSpace.x - endTerminalPagePosition.x,
 				},
+				arrowheadEnd: isDirected ? "arrow" : "none",
 			},
 		})
 
