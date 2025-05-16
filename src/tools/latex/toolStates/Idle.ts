@@ -21,7 +21,7 @@ export class Idle extends StateNode {
     };
 
     override onExit = () => {
-        updateHoveredShapeId().cancel();
+        // 不需要在這裡調用 cancel，因為 throttle 函數會自動處理
     }
 
     override onKeyDown(info: TLKeyboardEventInfo) {
@@ -49,40 +49,38 @@ export class Idle extends StateNode {
     }
 }
 
-
 function _updateHoveredShapeId(editor: Editor) {
-	// todo: consider replacing `get hoveredShapeId` with this; it would mean keeping hoveredShapeId in memory rather than in the store and possibly re-computing it more often than necessary
-	const hitShape = editor.getShapeAtPoint(editor.inputs.currentPagePoint, {
-		hitInside: false,
-		hitLabels: false,
-		margin: editor.options.hitTestMargin / editor.getZoomLevel(),
-		renderingOnly: true,
-	})
+    const hitShape = editor.getShapeAtPoint(editor.inputs.currentPagePoint, {
+        hitInside: false,
+        hitLabels: false,
+        margin: editor.options.hitTestMargin / editor.getZoomLevel(),
+        renderingOnly: true,
+    })
 
-	if (!hitShape) return editor.setHoveredShape(null)
+    if (!hitShape) return editor.setHoveredShape(null)
 
-	let shapeToHover: TLShape | undefined = undefined
+    let shapeToHover: TLShape | undefined = undefined
 
-	const outermostShape = editor.getOutermostSelectableShape(hitShape)
+    const outermostShape = editor.getOutermostSelectableShape(hitShape)
 
-	if (outermostShape === hitShape) {
-		shapeToHover = hitShape
-	} else {
-		if (
-			outermostShape.id === editor.getFocusedGroupId() ||
-			editor.getSelectedShapeIds().includes(outermostShape.id)
-		) {
-			shapeToHover = hitShape
-		} else {
-			shapeToHover = outermostShape
-		}
-	}
+    if (outermostShape === hitShape) {
+        shapeToHover = hitShape
+    } else {
+        if (
+            outermostShape.id === editor.getFocusedGroupId() ||
+            editor.getSelectedShapeIds().includes(outermostShape.id)
+        ) {
+            shapeToHover = hitShape
+        } else {
+            shapeToHover = outermostShape
+        }
+    }
 
-	return editor.setHoveredShape(shapeToHover.id)
+    return editor.setHoveredShape(shapeToHover.id)
 }
 
 /** @internal */
 export const updateHoveredShapeId = throttle(
-	_updateHoveredShapeId,
-	process.env.NODE_ENV === 'test' ? 0 : 32
+    _updateHoveredShapeId,
+    process.env.NODE_ENV === 'test' ? 0 : 32
 )
