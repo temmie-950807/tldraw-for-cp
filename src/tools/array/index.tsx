@@ -1,4 +1,4 @@
-import { StateNode, createShapeId } from "tldraw";
+import { StateNode, createShapeId, toRichText } from "tldraw";
 import { createInputDialog } from "./InputDialog";
 
 const GAP = 150;
@@ -28,7 +28,7 @@ export class DrawArray extends StateNode {
                         geo: "rectangle",
                         w: 100,
                         h: 100,
-                        text: userInput.content[i],
+                        richText: toRichText(userInput.content[i]),
                         dash: "solid",
                     },
                 });
@@ -38,7 +38,7 @@ export class DrawArray extends StateNode {
                     x: rectangle.x,
                     y: rectangle.y - 40,
                     props: {
-                        text: (i + userInput.based).toString(),
+                        richText: toRichText((i + userInput.based).toString()),
                         color: "grey",
                     },
                 });

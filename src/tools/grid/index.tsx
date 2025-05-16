@@ -1,4 +1,4 @@
-import { StateNode, createShapeId } from "tldraw";
+import { StateNode, createShapeId, toRichText } from "tldraw";
 import { createInputDialog } from "./InputDialog";
 import { SQUARE_SIZE, COLOR_MAP, FILL_MAP } from "./constants";
 
@@ -31,7 +31,7 @@ export class DrawGrid extends StateNode {
                             geo: "rectangle",
                             w: SQUARE_SIZE,
                             h: SQUARE_SIZE,
-                            text: content[i][j],
+                            richText: toRichText(content[i][j]),
                             dash: "solid",
                             color: isColor ? COLOR_MAP[content[i][j]] : "black",
                             fill: isColor ? FILL_MAP[content[i][j]] : "solid",
@@ -47,7 +47,7 @@ export class DrawGrid extends StateNode {
                     x: currentPagePoint.x - 40,
                     y: currentPagePoint.y + SQUARE_SIZE * i,
                     props: {
-                        text: (i + based).toString(),
+                        richText: toRichText((i + based).toString()),
                         color: "grey",
                     },
                 });
@@ -60,7 +60,7 @@ export class DrawGrid extends StateNode {
                     x: currentPagePoint.x + SQUARE_SIZE * j,
                     y: currentPagePoint.y - 40,
                     props: {
-                        text: (j + based).toString(),
+                        richText: toRichText((j + based).toString()),
                         color: "grey",
                     },
                 });

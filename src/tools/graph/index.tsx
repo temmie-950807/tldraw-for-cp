@@ -1,4 +1,4 @@
-import { Editor, StateNode, TLArrowBinding, TLArrowShape, TLShapeId, Vec, createShapeId } from "tldraw";
+import { Editor, StateNode, TLArrowBinding, TLArrowShape, TLShapeId, Vec, createShapeId, toRichText } from "tldraw";
 import { createInputDialog } from "./InputDialog";
 import { OFFSET, GAP } from "./constants";
 
@@ -45,7 +45,7 @@ export class DrawGraph extends StateNode {
                             x: currentPagePoint.x - OFFSET + GAP * i,
                             y: currentPagePoint.y - OFFSET,
                             props: {
-                                text: node[i],
+								richText: toRichText(node[i]),
                                 fill: "semi",
                                 dash: "solid",
                                 font: "mono",
