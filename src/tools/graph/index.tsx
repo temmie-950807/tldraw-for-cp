@@ -1,6 +1,7 @@
 import { Editor, StateNode, TLArrowBinding, TLArrowShape, TLShapeId, Vec, createShapeId, toRichText } from "tldraw";
 import { createInputDialog } from "./InputDialog";
 import { OFFSET, GAP } from "./constants";
+import * as cola from "webcola";
 
 export class DrawGraph extends StateNode {
     static override id = "graph"
@@ -35,6 +36,20 @@ export class DrawGraph extends StateNode {
                 let node_id = new Map;
                 if (node.length > 0) {
                     const { currentPagePoint } = this.editor.inputs
+                    
+                    // 使用 webcola 計算節點位置
+                    const layout = new cola.Layout()
+                        .nodes(node.map((_, i) => ({ index: i })))
+                        .links(edge.map(e => ({
+                            source: node.indexOf(e[0]),
+                            target: node.indexOf(e[1])
+                        })))
+                        .jaccardLinkLengths(250)
+                        .avoidOverlaps(true)
+                        .convergenceThreshold(0.1)
+                        .start(20);
+
+                    // 建立節點
                     for (let i = 0; i < node.length; i++) {
                         let shape_id = createShapeId();
                         node_id.set(node[i], shape_id);
@@ -42,10 +57,10 @@ export class DrawGraph extends StateNode {
                         this.editor.createShape({
                             id: shape_id,
                             type: "geo",
-                            x: currentPagePoint.x - OFFSET + GAP * i,
-                            y: currentPagePoint.y - OFFSET,
+                            x: currentPagePoint.x + layout.nodes()[i].x,
+                            y: currentPagePoint.y + layout.nodes()[i].y,
                             props: {
-								richText: toRichText(node[i]),
+                                richText: toRichText(node[i]),
                                 fill: "semi",
                                 dash: "solid",
                                 font: "mono",
