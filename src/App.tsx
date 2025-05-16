@@ -8,13 +8,14 @@ import {
 } from "tldraw"
 import { customAssetUrls } from "./asset"
 import { uiOverrides, components } from "./ui-overrides"
-import { DrawArray } from "./tools/array"
+import { DrawArray } from "./tools/array/index"
 import { DrawGrid } from "./tools/grid"
 import { DrawGraph } from "./tools/graph"
 import { AddCode, CodeUtil } from "./tools/code"
 import { DrawLatex } from "./tools/latex/LatexShapeTool"
 import { LatexUtil } from "./tools/latex/LatexShapeUtil"
 import { DrawAi } from "./tools/ai/ai"
+import "./tools/array/styles.css"
 
 const customTools = [DrawArray, DrawGrid, DrawGraph, AddCode, DrawLatex, DrawAi]
 const customShape = [CodeUtil, LatexUtil]
