@@ -68,15 +68,15 @@ export const uiOverrides: TLUiOverrides = {
                 editor.setCurrentTool("latex");
             },
         };
-        tools.ai = {
-            id: "ai",
-            icon: "ai-icon",
-            label: "Ai",
-            kbd: "x",
-            onSelect: () => {
-                editor.setCurrentTool("ai");
-            },
-        };
+        // tools.ai = {
+        //     id: "ai",
+        //     icon: "ai-icon",
+        //     label: "Ai",
+        //     kbd: "x",
+        //     onSelect: () => {
+        //         editor.setCurrentTool("ai");
+        //     },
+        // };
         return tools
     },
 }
@@ -89,7 +89,7 @@ export const components: TLComponents = {
         const isGraphSelected = useIsToolSelected(tools["graph"])
         const isCodeSelected = useIsToolSelected(tools["code"])
         const isLatexSelected = useIsToolSelected(tools["latex"])
-        const isAiSelected = useIsToolSelected(tools["ai"])
+        // const isAiSelected = useIsToolSelected(tools["ai"])
         return (
             <DefaultToolbar {...props}>
                 <DefaultToolbarContent />
@@ -98,7 +98,7 @@ export const components: TLComponents = {
                 <TldrawUiMenuItem {...tools["graph"]} isSelected={isGraphSelected} />
                 <TldrawUiMenuItem {...tools["code"]} isSelected={isCodeSelected} />
                 <TldrawUiMenuItem {...tools["latex"]} isSelected={isLatexSelected} />
-                <TldrawUiMenuItem {...tools["ai"]} isSelected={isAiSelected} />
+                {/* <TldrawUiMenuItem {...tools["ai"]} isSelected={isAiSelected} /> */}
             </DefaultToolbar>
         )
     },
@@ -112,7 +112,7 @@ export const components: TLComponents = {
                 <TldrawUiMenuItem {...tools["graph"]} />
                 <TldrawUiMenuItem {...tools["code"]} />
                 <TldrawUiMenuItem {...tools["latex"]} />
-                <TldrawUiMenuItem {...tools["ai"]} />
+                {/* <TldrawUiMenuItem {...tools["ai"]} /> */}
             </DefaultKeyboardShortcutsDialog>
         )
     },
