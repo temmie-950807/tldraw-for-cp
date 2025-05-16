@@ -9,13 +9,14 @@ import {
 import { customAssetUrls } from "./asset"
 import { uiOverrides, components } from "./ui-overrides"
 import { DrawArray } from "./tools/array/index"
-import { DrawGrid } from "./tools/grid"
+import { DrawGrid } from "./tools/grid/index"
 import { DrawGraph } from "./tools/graph"
 import { AddCode, CodeUtil } from "./tools/code"
 import { DrawLatex } from "./tools/latex/LatexShapeTool"
 import { LatexUtil } from "./tools/latex/LatexShapeUtil"
 import { DrawAi } from "./tools/ai/ai"
 import "./tools/array/styles.css"
+import "./tools/grid/styles.css"
 
 const customTools = [DrawArray, DrawGrid, DrawGraph, AddCode, DrawLatex, DrawAi]
 const customShape = [CodeUtil, LatexUtil]

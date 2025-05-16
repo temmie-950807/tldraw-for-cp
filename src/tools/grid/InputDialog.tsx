@@ -1,40 +1,7 @@
-import { StateNode } from "tldraw"
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
-const SQUARE_SIZE = 100
-
-const COLOR_MAP: { [key: string]: string } = {
-    // 牆壁
-    '#': "black",
-    '@': "black",
-    '%': "black",
-
-    // 地板
-    '.': "black",
-};
-
-const FILL_MAP: { [key: string]: string } = {
-    // 牆壁
-    '#': "semi",
-    '@': "semi",
-    '%': "semi",
-
-    // 地板
-    '.': "solid",
-};
-
-const OPACITY_MAP: { [key: string]: number } = {
-    // 牆壁
-    '#': 0.1,
-    '@': 0.1,
-    '%': 0.1,
-
-    // 地板
-    '.': 1,
-};
-
-type InputData = {
+export type InputData = {
     isValidInput: boolean;
     based: number;
     height: number;
@@ -73,7 +40,6 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
             .split("\n")
             .map(str => str.trim().split(" "))
             .filter(str => str.length && str[0].length);
-        console.log("userInput", userInput);
 
         if (textareaValue.length==0) {
             setIsValidInput(false);
@@ -119,10 +85,8 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                         }
                     }
                 }else if (splitBySpace==true && userInput.slice(1).every(row => row.length==W)){
-                    console.log("userInput", userInput);
                     for (let i=1 ; i<=H ; i++) {
                         const temp: string[] = userInput[i];
-                        console.log("temp", temp);
                         for (let j=0 ; j<W ; j++) {
                             result[i-1][j] = temp[j];
                         }
@@ -164,7 +128,6 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
         });
     };
 
-    // 若 Dialog 本體被按到的話，就會使用 stopPropagation 防止冒泡
     const handleDialogClick = (e: React.MouseEvent) => {
         e.stopPropagation();
     };
@@ -188,7 +151,14 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
             >
                 <p>Index shift:</p>
                 <div className="slider-container">
-                    <input type="range" min="-2" max="2" defaultValue="0" step="1" className="slider" style={{ width: "100%" }}
+                    <input 
+                        type="range" 
+                        min="-2" 
+                        max="2" 
+                        defaultValue="0" 
+                        step="1" 
+                        className="slider" 
+                        style={{ width: "100%" }}
                         onChange={(e) => setBased(Number(e.target.value))}
                     />
                     <div className="labels" style={{ display: "flex", justifyContent: "space-between" }}>
@@ -199,13 +169,13 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                         <span>2</span>
                     </div>
                 </div>
-                <br/>
+                <br />
 
                 <label>
-                    Enable auto color:
+                    Auto color:
                     <input
                         type="checkbox"
-                        value={autoColor.toString()}
+                        checked={autoColor}
                         onChange={(e) => setAutoColor(e.target.checked)}
                     />
                 </label>
@@ -215,7 +185,7 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                     Split by space:
                     <input
                         type="checkbox"
-                        value={splitBySpace.toString()}
+                        checked={splitBySpace}
                         onChange={(e) => setSplitBySpace(e.target.checked)}
                     />
                 </label>
@@ -223,26 +193,50 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
 
                 <p>Grid content:</p>
                 <textarea
-                    rows={5}
                     value={textareaValue}
-                    placeholder={"3 5"+String.fromCharCode(10)+"(below is optional)"+String.fromCharCode(10)+"#####"+String.fromCharCode(10)+"#...#"+String.fromCharCode(10)+"#####"}
-                    style={{ padding: "10px", width: "100%", boxSizing: "border-box", resize: "vertical", borderRadius: "6px"}}
+                    placeholder={"2 3\n###\n###"}
+                    style={{ 
+                        padding: "10px",
+                        height: "150px",
+                        resize: "none"
+                    }}
                     onChange={(e) => setTextareaValue(e.target.value)}
                 />
                 <br />
-
-                {isValidInput ? <p style={{ color: "green" }}>Valid</p> : <p style={{ color: "red" }}>Invalid</p>}
-                <br />
                 <div style={{ display: "flex", gap: "10px" }}>
-                    <button style={{ flex: "1", height: "2em", backgroundColor: "#CCCCCC", color: "#000000", border: "0px", borderRadius: "6px" }} onClick={handleCancelClick}>Cancel</button>
-                    <button style={{ flex: "1", height: "2em", backgroundColor: "#3182ED", color: "#FFFFFF", border: "0px", borderRadius: "6px" }} onClick={handleOkClick}>OK</button>
+                    <button 
+                        style={{ 
+                            flex: "1", 
+                            height: "2em", 
+                            backgroundColor: "#CCCCCC", 
+                            color: "#000000", 
+                            border: "0px", 
+                            borderRadius: "6px" 
+                        }} 
+                        onClick={handleCancelClick}
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        style={{ 
+                            flex: "1", 
+                            height: "2em", 
+                            backgroundColor: "#3182ED", 
+                            color: "#FFFFFF", 
+                            border: "0px", 
+                            borderRadius: "6px" 
+                        }} 
+                        onClick={handleOkClick}
+                    >
+                        OK
+                    </button>
                 </div>
             </div>
         </div>
     );
 };
 
-let createInputDialog = async (): Promise<InputData> => {
+export const createInputDialog = async (): Promise<InputData> => {
     return new Promise<InputData>((resolve) => {
         const container = document.createElement("div");
         document.body.appendChild(container);
@@ -255,74 +249,4 @@ let createInputDialog = async (): Promise<InputData> => {
 
         ReactDOM.render(<InputDialog onClose={handleClose} />, container);
     });
-}
-
-export class DrawGrid extends StateNode {
-    static override id = "grid"
-    static override isLockable = true
-    override shapeType = "draw"
-    
-    override onEnter = () => {
-        this.editor.setCursor({ type: "cross", rotation: 0 })
-    }
-
-    override onPointerDown = () => {
-
-        createInputDialog().then(userInput => {
-            if (userInput.isValidInput==true) {
-                const height: number = userInput.height
-                const width: number = userInput.width
-                const based: number = userInput.based
-                const content: string[][] = userInput.content
-                const autocolor: boolean = userInput.isColor
-
-                // 建立表格
-                const { currentPagePoint } = this.editor.inputs
-                
-                for (let j=0 ; j<width ; j++){
-                    this.editor.createShape({
-                        type: "text",
-                        x: currentPagePoint.x + SQUARE_SIZE * j,
-                        y: currentPagePoint.y - 40,
-                        opacity: 1,
-                        props: {
-                            font: "mono",
-                            text: (j + based).toString(),
-                            color: "grey",
-                        },
-                    })
-                }
-                for (let i=0 ; i<height ; i++){
-                    this.editor.createShape({
-                        type: "text",
-                        x: currentPagePoint.x - 40,
-                        y: currentPagePoint.y + SQUARE_SIZE * i,
-                        opacity: 1,
-                        props: {
-                            font: "mono",
-                            text: (i + based).toString(),
-                            color: "grey",
-                        },
-                    })
-                    for (let j=0 ; j<width ; j++){
-                        this.editor.createShape({
-                            type: "geo",
-                            x: currentPagePoint.x + SQUARE_SIZE * j,
-                            y: currentPagePoint.y + SQUARE_SIZE * i,
-                            opacity: autocolor ? (OPACITY_MAP[content[i][j]] || 1) : 1,
-                            
-                            props: {
-                                geo: "rectangle",
-                                text: content[i][j],
-                                fill: autocolor ? (FILL_MAP[content[i][j]] || "solid") : "semi",
-                                color: autocolor ? (COLOR_MAP[content[i][j]] || "black") : "black",
-                                dash: "solid",
-                                font: "mono",
-                            },
-                        })
-                    }
-                }
-            }
-        });
-    }
-}
+}; 
