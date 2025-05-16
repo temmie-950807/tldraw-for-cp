@@ -116,7 +116,6 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
         });
     };
 
-    // 若 Dialog 本體被按到的話，就會使用 stopPropagation 防止冒泡
     const handleDialogClick = (e: React.MouseEvent) => {
         e.stopPropagation();
     };
@@ -138,62 +137,112 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                 }}
                 onClick={handleDialogClick}
             >
-                <div style={{ marginBottom: "10px" }}>
-                    <label style={{ display: "block", marginBottom: "5px" }}>圖形類型：</label>
-                    <select
-                        value={graphType}
-                        onChange={(e) => setGraphType(e.target.value as GraphType)}
-                        style={{ width: "100%", padding: "5px" }}
-                    >
-                        <option value="任意圖">任意圖</option>
-                        <option value="K_n">K_n（完全圖）</option>
-                        <option value="K_{n,m}">K_n,m（二分圖）</option>
-                        <option value="C_n">C_n（環）</option>
-                        <option value="P_n">P_n（鍊）</option>
-                    </select>
-                </div>
+                <p>圖形類型：</p>
+                <select
+                    value={graphType}
+                    onChange={(e) => setGraphType(e.target.value as GraphType)}
+                    style={{ 
+                        width: "100%", 
+                        padding: "10px",
+                        marginBottom: "10px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc"
+                    }}
+                >
+                    <option value="任意圖">任意圖</option>
+                    <option value="K_n">K_n（完全圖）</option>
+                    <option value="K_{n,m}">K_n,m（二分圖）</option>
+                    <option value="C_n">C_n（環）</option>
+                    <option value="P_n">P_n（鍊）</option>
+                </select>
 
                 {graphType === "任意圖" ? (
                     <>
-                        <p>graph structure:</p>
-                        <textarea
-                            rows={10}
-                            cols={20}
+                        <p>圖形結構：</p>
+                        <input
                             value={textareaValue}
-                            style={{ padding: "10px" }}
+                            placeholder={"v0\nv1\nv0 v1"}
+                            style={{ 
+                                padding: "10px",
+                                width: "100%",
+                                boxSizing: "border-box",
+                                borderRadius: "6px",
+                                border: "1px solid #ccc"
+                            }}
                             onChange={(e) => setTextareaValue(e.target.value)}
                         />
                     </>
                 ) : (
                     <div style={{ marginBottom: "10px" }}>
-                        <label style={{ display: "block", marginBottom: "5px" }}>
-                            n: <input
-                                type="number"
-                                min="1"
-                                max="20"
-                                value={n}
-                                onChange={(e) => setN(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
-                                style={{ width: "60px", padding: "5px" }}
-                            />
-                        </label>
+                        <p>n: </p>
+                        <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={n}
+                            onChange={(e) => setN(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
+                            style={{ 
+                                width: "100%",
+                                padding: "10px",
+                                borderRadius: "6px",
+                                border: "1px solid #ccc",
+                                marginBottom: "10px",
+                                boxSizing: "border-box",
+                                WebkitAppearance: "none",
+                                MozAppearance: "textfield"
+                            }}
+                        />
                         {graphType === "K_{n,m}" && (
-                            <label style={{ display: "block", marginBottom: "5px" }}>
-                                m: <input
+                            <>
+                                <p>m: </p>
+                                <input
                                     type="number"
                                     min="1"
                                     max="20"
                                     value={m}
                                     onChange={(e) => setM(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
-                                    style={{ width: "60px", padding: "5px" }}
+                                    style={{ 
+                                        width: "100%",
+                                        padding: "10px",
+                                        borderRadius: "6px",
+                                        border: "1px solid #ccc",
+                                        boxSizing: "border-box",
+                                        WebkitAppearance: "none",
+                                        MozAppearance: "textfield"
+                                    }}
                                 />
-                            </label>
+                            </>
                         )}
                     </div>
                 )}
 
-                <div style={{ display: "flex", gap: "10px" }}>
-                    <button style={{ flex: "1", height: "2em", backgroundColor: "#CCCCCC", color: "#000000", border: "0px", borderRadius: "6px" }} onClick={handleCancelClick}>Cancel</button>
-                    <button style={{ flex: "1", height: "2em", backgroundColor: "#3182ED", color: "#FFFFFF", border: "0px", borderRadius: "6px" }} onClick={handleOkClick}>OK</button>
+                <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                    <button 
+                        style={{ 
+                            flex: "1", 
+                            height: "2em", 
+                            backgroundColor: "#CCCCCC", 
+                            color: "#000000", 
+                            border: "0px", 
+                            borderRadius: "6px" 
+                        }} 
+                        onClick={handleCancelClick}
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        style={{ 
+                            flex: "1", 
+                            height: "2em", 
+                            backgroundColor: "#3182ED", 
+                            color: "#FFFFFF", 
+                            border: "0px", 
+                            borderRadius: "6px" 
+                        }} 
+                        onClick={handleOkClick}
+                    >
+                        OK
+                    </button>
                 </div>
             </div>
         </div>
@@ -213,4 +262,4 @@ export const createInputDialog = async (): Promise<InputType> => {
 
         ReactDOM.render(<InputDialog onClose={handleClose} />, container);
     });
-} 
+}; 
