@@ -202,6 +202,11 @@ const InputDialog: React.FC<InputDialogProps> = ({ onClose }) => {
                     }}
                     onChange={(e) => setTextareaValue(e.target.value)}
                 />
+                {!isValidInput && (
+                    <p style={{ color: "red", margin: "5px 0" }}>
+                        請輸入有效的網格格式。第一行應為兩個數字（高度和寬度），後續行應符合指定的尺寸。
+                    </p>
+                )}
                 <br />
                 <div style={{ display: "flex", gap: "10px" }}>
                     <button 

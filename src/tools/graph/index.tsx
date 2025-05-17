@@ -1,6 +1,5 @@
 import { Editor, StateNode, TLArrowBinding, TLArrowShape, TLShapeId, Vec, createShapeId, toRichText } from "tldraw";
 import { createInputDialog } from "./InputDialog";
-import { OFFSET, GAP } from "./constants";
 import * as cola from "webcola";
 
 export class DrawGraph extends StateNode {
