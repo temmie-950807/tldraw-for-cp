@@ -43,7 +43,7 @@ export class DrawGraph extends StateNode {
                             source: node.indexOf(e[0]),
                             target: node.indexOf(e[1])
                         })))
-                        .jaccardLinkLengths(250)
+                        .jaccardLinkLengths(200)
                         .avoidOverlaps(true)
                         .convergenceThreshold(0.1)
                         .start(20);
