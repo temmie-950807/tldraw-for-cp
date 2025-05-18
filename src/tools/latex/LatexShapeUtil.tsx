@@ -231,7 +231,7 @@ export class LatexUtil extends ShapeUtil<LatexShape> {
         const isSelected = id === this.editor.getOnlySelectedShapeId()
         const isEditing = id === this.editor.getEditingShapeId()
         const theme = useDefaultColorTheme()
-        const handleKeyDown = useTextShapeKeydownHandler(id)
+        // const handleKeyDown = useTextShapeKeydownHandler(id)
 
         if (isEditing) {
             return (
@@ -254,7 +254,7 @@ export class LatexUtil extends ShapeUtil<LatexShape> {
                         transformOrigin: 'top left',
                     }}
                     wrap
-                    onKeyDown={handleKeyDown}
+                    // onKeyDown={handleKeyDown}
                 >
                 </TextLabel>
             )
@@ -369,34 +369,34 @@ function resizeScaled(
     }
 }
 
-function useTextShapeKeydownHandler(id: TLShapeId) {
-    const editor = useEditor()
+// function useTextShapeKeydownHandler(id: TLShapeId) {
+//     const editor = useEditor()
 
-    return useCallback(
-        (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-            if (editor.getEditingShapeId() !== id) return
+//     return useCallback(
+//         (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+//             if (editor.getEditingShapeId() !== id) return
 
-            switch (e.key) {
-                case 'Enter': {
-                    if (e.ctrlKey || e.metaKey) {
-                        editor.complete()
-                    }
-                    break
-                }
-                // case 'Tab': {
-                //     preventDefault(e)
-                //     if (e.shiftKey) {
-                //         TextHelpers.unindent(e.currentTarget)
-                //     } else {
-                //         TextHelpers.indent(e.currentTarget)
-                //     }
-                //     break
-                // }
-            }
-        },
-        [editor, id]
-    )
-}
+//             switch (e.key) {
+//                 case 'Enter': {
+//                     if (e.ctrlKey || e.metaKey) {
+//                         editor.complete()
+//                     }
+//                     break
+//                 }
+//                 // case 'Tab': {
+//                 //     preventDefault(e)
+//                 //     if (e.shiftKey) {
+//                 //         TextHelpers.unindent(e.currentTarget)
+//                 //     } else {
+//                 //         TextHelpers.indent(e.currentTarget)
+//                 //     }
+//                 //     break
+//                 // }
+//             }
+//         },
+//         [editor, id]
+//     )
+// }
 
 function exhaustiveSwitchError(value: never, property?: string): never {
 	const debugValue =
