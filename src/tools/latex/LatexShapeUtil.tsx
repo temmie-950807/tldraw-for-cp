@@ -24,7 +24,6 @@ import {
     useEditor,
 } from "tldraw"
 import { MathJax, MathJaxContext } from "better-react-mathjax";
-import { useCallback } from "react";
 
 interface LatexShapeProps {
     color: TLDefaultColorStyle
