@@ -23,7 +23,7 @@ const customShape = [CodeUtil, LatexUtil]
 // 設定預設調色板
 DefaultColorStyle.setDefaultValue("black");
 DefaultFontStyle.setDefaultValue("mono");
-DefaultFillStyle.setDefaultValue("semi");
+DefaultFillStyle.setDefaultValue("none");
 DefaultDashStyle.setDefaultValue("solid");
 DefaultSizeStyle.setDefaultValue("m");
 
