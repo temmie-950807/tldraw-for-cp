@@ -14,11 +14,18 @@ import { DrawGraph } from "./tools/graph/index"
 import { AddCode, CodeUtil } from "./tools/code"
 import { DrawLatex } from "./tools/latex/LatexShapeTool"
 import { LatexUtil } from "./tools/latex/LatexShapeUtil"
+import {
+    ContainerShapeUtil,
+    ElementShapeUtil,
+    LayoutBindingUtil,
+    DrawLayout,
+} from "./tools/layout"
 import "./tools/array/styles.css"
 import "./tools/grid/styles.css"
 
-const customTools = [DrawArray, DrawGrid, DrawGraph, AddCode, DrawLatex]
-const customShape = [CodeUtil, LatexUtil]
+const customTools = [DrawArray, DrawGrid, DrawGraph, AddCode, DrawLatex, DrawLayout]
+const customShape = [CodeUtil, LatexUtil, ContainerShapeUtil, ElementShapeUtil]
+const customBindingUtils = [LayoutBindingUtil]
 
 // 設定預設調色板
 DefaultColorStyle.setDefaultValue("black");
@@ -35,6 +42,7 @@ export default function App() {
                 tools={customTools}
                 initialState="select"
                 shapeUtils={customShape}
+                bindingUtils={customBindingUtils}
                 overrides={uiOverrides}
                 components={components}
                 assetUrls={customAssetUrls}

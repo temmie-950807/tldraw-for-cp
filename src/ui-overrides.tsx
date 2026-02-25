@@ -13,15 +13,15 @@ import {
 
 export const uiOverrides: TLUiOverrides = {
     //[a]
-	actions(_editor, actions): TLUiActionsContextType {
-		const newActions = {
-			...actions,
-			"unlock-all": { ...actions["unlock-all"], kbd: "?!l" },
-            "copy-as-png": {...actions["copy-as-png"], kbd: "?!c"},
-		}
+    actions(_editor, actions): TLUiActionsContextType {
+        const newActions = {
+            ...actions,
+            "unlock-all": { ...actions["unlock-all"], kbd: "?!l" },
+            "copy-as-png": { ...actions["copy-as-png"], kbd: "?!c" },
+        }
 
-		return newActions
-	},
+        return newActions
+    },
     tools(editor, tools) {
         tools.array = {
             id: "array",
@@ -32,40 +32,49 @@ export const uiOverrides: TLUiOverrides = {
                 editor.setCurrentTool("array")
             },
         },
-        tools.grid = {
-            id: "grid",
-            icon: "grid-icon",
-            label: "Grid",
-            kbd: "i",
-            onSelect: () => {
-                editor.setCurrentTool("grid")
+            tools.grid = {
+                id: "grid",
+                icon: "grid-icon",
+                label: "Grid",
+                kbd: "i",
+                onSelect: () => {
+                    editor.setCurrentTool("grid")
+                },
             },
-        },
-        tools.graph = {
-            id: "graph",
-            icon: "graph-icon",
-            label: "Graph",
-            kbd: "g",
-            onSelect: () => {
-                editor.setCurrentTool("graph")
+            tools.graph = {
+                id: "graph",
+                icon: "graph-icon",
+                label: "Graph",
+                kbd: "g",
+                onSelect: () => {
+                    editor.setCurrentTool("graph")
+                },
             },
-        },
-        tools.code = {
-            id: "code",
-            icon: "code-icon",
-            label: "Code",
-            kbd: "c",
-            onSelect: () => {
-                editor.setCurrentTool("code")
+            tools.code = {
+                id: "code",
+                icon: "code-icon",
+                label: "Code",
+                kbd: "c",
+                onSelect: () => {
+                    editor.setCurrentTool("code")
+                },
             },
-        },
-        tools.latex = {
-            id: "latex",
-            icon: "latex-icon",
-            label: "LaTeX",
-            kbd: "l",
+            tools.latex = {
+                id: "latex",
+                icon: "latex-icon",
+                label: "LaTeX",
+                kbd: "l",
+                onSelect: () => {
+                    editor.setCurrentTool("latex");
+                },
+            };
+        tools.layout = {
+            id: "layout",
+            icon: "layout-icon",
+            label: "Layout",
+            kbd: "y",
             onSelect: () => {
-                editor.setCurrentTool("latex");
+                editor.setCurrentTool("layout");
             },
         };
         // tools.ai = {
@@ -89,6 +98,7 @@ export const components: TLComponents = {
         const isGraphSelected = useIsToolSelected(tools["graph"])
         const isCodeSelected = useIsToolSelected(tools["code"])
         const isLatexSelected = useIsToolSelected(tools["latex"])
+        const isLayoutSelected = useIsToolSelected(tools["layout"])
         // const isAiSelected = useIsToolSelected(tools["ai"])
         return (
             <DefaultToolbar {...props}>
@@ -98,6 +108,7 @@ export const components: TLComponents = {
                 <TldrawUiMenuItem {...tools["graph"]} isSelected={isGraphSelected} />
                 <TldrawUiMenuItem {...tools["code"]} isSelected={isCodeSelected} />
                 <TldrawUiMenuItem {...tools["latex"]} isSelected={isLatexSelected} />
+                <TldrawUiMenuItem {...tools["layout"]} isSelected={isLayoutSelected} />
                 {/* <TldrawUiMenuItem {...tools["ai"]} isSelected={isAiSelected} /> */}
             </DefaultToolbar>
         )
@@ -112,6 +123,7 @@ export const components: TLComponents = {
                 <TldrawUiMenuItem {...tools["graph"]} />
                 <TldrawUiMenuItem {...tools["code"]} />
                 <TldrawUiMenuItem {...tools["latex"]} />
+                <TldrawUiMenuItem {...tools["layout"]} />
                 {/* <TldrawUiMenuItem {...tools["ai"]} /> */}
             </DefaultKeyboardShortcutsDialog>
         )
