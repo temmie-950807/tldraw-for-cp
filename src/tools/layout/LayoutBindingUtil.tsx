@@ -14,7 +14,7 @@ import {
     CONTAINER_TYPE,
     ContainerShape,
 } from "./ContainerShapeUtil"
-import { ElementShape } from "./ElementShapeUtil"
+import { ElementShape, ELEMENT_SIZE } from "./ElementShapeUtil"
 
 export const LAYOUT_TYPE = "layout"
 
@@ -76,7 +76,7 @@ export class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
             if (toId === binding.toId && placeholder) continue
 
             const offset = new Vec(
-                CONTAINER_PADDING + i * (100 + CONTAINER_PADDING),
+                CONTAINER_PADDING + i * (ELEMENT_SIZE + CONTAINER_PADDING),
                 CONTAINER_PADDING
             )
 
@@ -102,11 +102,11 @@ export class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
 
         const width =
             CONTAINER_PADDING +
-            (bindings.length * 100 +
+            (bindings.length * ELEMENT_SIZE +
                 (bindings.length - 1) * CONTAINER_PADDING) +
             CONTAINER_PADDING
 
-        const height = CONTAINER_PADDING + 100 + CONTAINER_PADDING
+        const height = CONTAINER_PADDING + ELEMENT_SIZE + CONTAINER_PADDING
 
         if (
             width !== container.props.width ||

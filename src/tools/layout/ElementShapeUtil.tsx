@@ -1,16 +1,26 @@
 import {
+    DefaultColorStyle,
+    DefaultDashStyle,
+    DefaultFillStyle,
+    DefaultSizeStyle,
     HTMLContainer,
     IndexKey,
     RecordProps,
     Rectangle2d,
     ShapeUtil,
-    T,
     TLBaseShape,
+    TLDefaultColorStyle,
+    TLDefaultDashStyle,
+    TLDefaultFillStyle,
+    TLDefaultSizeStyle,
     TLShapeUtilCanBindOpts,
     Vec,
     clamp,
     createBindingId,
     getIndexBetween,
+    useDefaultColorTheme,
+    useEditor,
+    TLRichText,
 } from "tldraw"
 
 import {
@@ -19,22 +29,50 @@ import {
     CONTAINER_TYPE,
 } from "./ContainerShapeUtil"
 import { LayoutBinding } from "./LayoutBindingUtil"
+import { useEditableRichText } from "tldraw"
 
 const LAYOUT_TYPE = "layout"
 const ELEMENT_TYPE = "element"
+export const ELEMENT_SIZE = 100
 
-export type ElementShape = TLBaseShape<typeof ELEMENT_TYPE, { color: string }>
+const STROKE_SIZES: Record<TLDefaultSizeStyle, number> = {
+    s: 2,
+    m: 3.5,
+    l: 5,
+    xl: 10,
+}
+
+export type ElementShape = TLBaseShape<
+    typeof ELEMENT_TYPE,
+    {
+        color: TLDefaultColorStyle
+        fill: TLDefaultFillStyle
+        dash: TLDefaultDashStyle
+        size: TLDefaultSizeStyle
+        richText: TLRichText
+    }
+>
 
 export class ElementShapeUtil extends ShapeUtil<ElementShape> {
     static override type = ELEMENT_TYPE
 
     static override props: RecordProps<ElementShape> = {
-        color: T.string,
+        color: DefaultColorStyle,
+        fill: DefaultFillStyle,
+        dash: DefaultDashStyle,
+        size: DefaultSizeStyle,
+        richText: {
+            validate: (value: any) => value,
+        } as any,
     }
 
-    override getDefaultProps() {
+    override getDefaultProps(): ElementShape["props"] {
         return {
-            color: "#AEC6CF",
+            color: "black",
+            fill: "none",
+            dash: "solid",
+            size: "m",
+            richText: { type: "doc", content: [] },
         }
     }
 
@@ -51,7 +89,7 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
     }
 
     override canEdit() {
-        return false
+        return true
     }
 
     override canResize() {
@@ -68,25 +106,18 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
 
     override getGeometry() {
         return new Rectangle2d({
-            width: 100,
-            height: 100,
+            width: ELEMENT_SIZE,
+            height: ELEMENT_SIZE,
             isFilled: true,
         })
     }
 
     override component(shape: ElementShape) {
-        return (
-            <HTMLContainer
-                style={{
-                    backgroundColor: shape.props.color,
-                    borderRadius: "8px",
-                }}
-            ></HTMLContainer>
-        )
+        return <ElementComponent shape={shape} />
     }
 
     override indicator() {
-        return <rect rx={8} ry={8} width={100} height={100} />
+        return <rect rx={8} ry={8} width={ELEMENT_SIZE} height={ELEMENT_SIZE} />
     }
 
     private getTargetContainer(shape: ElementShape, pageAnchor: Vec) {
@@ -115,7 +146,7 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
         const order = clamp(
             Math.round(
                 (pageAnchor.x - container.x - CONTAINER_PADDING) /
-                (100 + CONTAINER_PADDING)
+                (ELEMENT_SIZE + CONTAINER_PADDING)
             ),
             0,
             siblings.length + 1
@@ -151,7 +182,7 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
     override onTranslate(_: ElementShape, shape: ElementShape) {
         const pageAnchor = this.editor
             .getShapePageTransform(shape)
-            .applyToPoint({ x: 50, y: 50 })
+            .applyToPoint({ x: ELEMENT_SIZE / 2, y: ELEMENT_SIZE / 2 })
 
         const targetContainer = this.getTargetContainer(shape, pageAnchor)
 
@@ -202,7 +233,7 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
     override onTranslateEnd(_: ElementShape, shape: ElementShape) {
         const pageAnchor = this.editor
             .getShapePageTransform(shape)
-            .applyToPoint({ x: 50, y: 50 })
+            .applyToPoint({ x: ELEMENT_SIZE / 2, y: ELEMENT_SIZE / 2 })
 
         const targetContainer = this.getTargetContainer(shape, pageAnchor)
 
@@ -229,4 +260,97 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
             },
         })
     }
+}
+
+// --- React Component ---
+
+function ElementComponent({ shape }: { shape: ElementShape }) {
+    const editor = useEditor()
+    const theme = useDefaultColorTheme()
+    const isEditing = editor.getEditingShapeId() === shape.id
+
+    const { color, fill, dash, size, richText } = shape.props
+
+    const themeColor = theme[color as keyof typeof theme]
+    const fillColor =
+        typeof themeColor === "object" && themeColor !== null
+            ? (themeColor as any).semi
+            : undefined
+    const strokeColor =
+        typeof themeColor === "object" && themeColor !== null
+            ? (themeColor as any).solid
+            : theme.text
+    const strokeWidth = STROKE_SIZES[size]
+
+
+    // 填充背景色
+    let bgColor = "transparent"
+    if (fill === "solid") {
+        bgColor = strokeColor
+    } else if (fill === "semi") {
+        bgColor = fillColor || "rgba(0,0,0,0.1)"
+    } else if (fill === "pattern") {
+        bgColor = fillColor || "rgba(0,0,0,0.05)"
+    }
+
+    const {
+        rInput,
+        isEmpty,
+        handleFocus,
+        handleBlur,
+        handleKeyDown,
+    } = useEditableRichText(shape.id, ELEMENT_TYPE, richText)
+
+    return (
+        <HTMLContainer
+            style={{
+                width: ELEMENT_SIZE,
+                height: ELEMENT_SIZE,
+                pointerEvents: "all",
+            }}
+        >
+            <div
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "8px",
+                    border: `${strokeWidth}px ${dash === "draw" ? "solid" : dash === "dashed" ? "dashed" : dash === "dotted" ? "dotted" : "solid"} ${strokeColor}`,
+                    backgroundColor: bgColor,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxSizing: "border-box",
+                    overflow: "hidden",
+                    position: "relative",
+                }}
+            >
+                {(isEditing || !isEmpty) && (
+                    <div
+                        ref={rInput as any}
+                        className="tl-rich-text"
+                        style={{
+                            width: ELEMENT_SIZE - strokeWidth * 2 - 8,
+                            height: ELEMENT_SIZE - strokeWidth * 2 - 8,
+                            color: strokeColor,
+                            fontSize: "14px",
+                            fontFamily: "var(--tl-font-mono)",
+                            textAlign: "center",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            outline: "none",
+                            pointerEvents: isEditing ? "all" : "none",
+                            userSelect: isEditing ? "text" : "none",
+                            padding: "4px",
+                            overflow: "hidden",
+                            wordBreak: "break-word",
+                        }}
+                        onFocus={handleFocus}
+                        onBlur={handleBlur}
+                        onKeyDown={handleKeyDown as any}
+                    />
+                )}
+            </div>
+        </HTMLContainer>
+    )
 }
