@@ -13,7 +13,7 @@ export const CONTAINER_PADDING = 24
 
 export type ContainerShape = TLBaseShape<
     typeof CONTAINER_TYPE,
-    { height: number; width: number; indexOffset: number }
+    { height: number; width: number; indexOffset: number; splitBySpace: boolean; inputText: string }
 >
 
 export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
@@ -23,6 +23,8 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
         height: T.number,
         width: T.number,
         indexOffset: T.number,
+        splitBySpace: T.boolean,
+        inputText: T.string,
     }
 
     override getDefaultProps() {
@@ -30,6 +32,8 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
             width: 100 + CONTAINER_PADDING * 2,
             height: 100 + CONTAINER_PADDING * 2,
             indexOffset: 0,
+            splitBySpace: false,
+            inputText: "",
         }
     }
 
