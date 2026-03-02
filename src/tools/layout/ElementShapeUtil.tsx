@@ -20,6 +20,7 @@ import {
     getIndexBetween,
     useDefaultColorTheme,
     useEditor,
+    useValue,
     TLRichText,
 } from "tldraw"
 
@@ -269,6 +270,28 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
     const theme = useDefaultColorTheme()
     const isEditing = editor.getEditingShapeId() === shape.id
 
+    // 計算此 element 在容器中的 0-based 陣列索引
+    const arrayIndex = useValue(
+        "element array index",
+        () => {
+            // 找到指向此 shape 的 layout binding
+            const bindings = editor.getBindingsToShape<LayoutBinding>(shape, LAYOUT_TYPE)
+            if (bindings.length === 0) return -1
+
+            const binding = bindings[0]
+            const containerId = binding.fromId
+
+            // 取得容器的所有 layout bindings，按 index 排序
+            const allBindings = editor
+                .getBindingsFromShape<LayoutBinding>(containerId as any, LAYOUT_TYPE)
+                .sort((a, b) => (a.props.index > b.props.index ? 1 : -1))
+
+            // 找出此 shape 在排序後的位置（0-based）
+            return allBindings.findIndex((b) => b.toId === shape.id)
+        },
+        [editor, shape.id]
+    )
+
     const { color, fill, dash, size, richText } = shape.props
 
     const themeColor = theme[color as keyof typeof theme]
@@ -320,8 +343,28 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                 width: ELEMENT_SIZE,
                 height: ELEMENT_SIZE,
                 pointerEvents: "all",
+                overflow: "visible",
             }}
         >
+            {/* 0-based 陣列索引標籤 — 顯示在方塊左上角外側 */}
+            {arrayIndex >= 0 && (
+                <div
+                    style={{
+                        position: "absolute",
+                        top: -20,
+                        left: 0,
+                        fontSize: "12px",
+                        fontFamily: "var(--tl-font-mono)",
+                        color: theme.text,
+                        lineHeight: "16px",
+                        pointerEvents: "none",
+                        userSelect: "none",
+                        whiteSpace: "nowrap",
+                    }}
+                >
+                    {arrayIndex}
+                </div>
+            )}
             <div
                 style={{
                     width: "100%",
