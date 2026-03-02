@@ -272,26 +272,39 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
     const { color, fill, dash, size, richText } = shape.props
 
     const themeColor = theme[color as keyof typeof theme]
-    const fillColor =
+    const semiColor =
         typeof themeColor === "object" && themeColor !== null
             ? (themeColor as any).semi
             : undefined
-    const strokeColor =
+    const solidColor =
         typeof themeColor === "object" && themeColor !== null
             ? (themeColor as any).solid
             : theme.text
+    const patternColor =
+        typeof themeColor === "object" && themeColor !== null
+            ? (themeColor as any).pattern
+            : undefined
+    const strokeColor = solidColor
     const strokeWidth = STROKE_SIZES[size]
 
-
-    // 填充背景色
+    // 根據四種填充樣式決定背景
+    // none: 透明
+    // semi: 使用主題的 semi 色（半透明淺色）
+    // solid: 使用主題的 solid 色（實心色，與邊框同色）
+    // pattern: 使用主題的 semi 色作為底色 + 交叉線圖案（使用 pattern 色）
     let bgColor = "transparent"
+    const showPattern = fill === "pattern"
+
     if (fill === "solid") {
-        bgColor = strokeColor
+        bgColor = semiColor || "rgba(0,0,0,0.1)"
     } else if (fill === "semi") {
-        bgColor = fillColor || "rgba(0,0,0,0.1)"
+        bgColor = "white"
     } else if (fill === "pattern") {
-        bgColor = fillColor || "rgba(0,0,0,0.05)"
+        bgColor = semiColor || "rgba(0,0,0,0.1)"
     }
+    // fill === "none" → transparent
+
+    const patternId = `pattern-${shape.id}`
 
     const {
         rInput,
@@ -324,6 +337,43 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                     position: "relative",
                 }}
             >
+                {/* Pattern 填充：交叉線圖案覆蓋層 */}
+                {showPattern && (
+                    <svg
+                        style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            pointerEvents: "none",
+                        }}
+                    >
+                        <defs>
+                            <pattern
+                                id={patternId}
+                                patternUnits="userSpaceOnUse"
+                                width="8"
+                                height="8"
+                                patternTransform="rotate(45)"
+                            >
+                                <line
+                                    x1="0" y1="0" x2="0" y2="8"
+                                    stroke={patternColor || solidColor}
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    opacity="0.82"
+                                />
+                            </pattern>
+                        </defs>
+                        <rect
+                            x="0" y="0"
+                            width="100%"
+                            height="100%"
+                            fill={`url(#${patternId})`}
+                            rx="6" ry="6"
+                        />
+                    </svg>
+                )}
                 {(isEditing || !isEmpty) && (
                     <div
                         ref={rInput as any}
@@ -331,7 +381,7 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                         style={{
                             width: ELEMENT_SIZE - strokeWidth * 2 - 8,
                             height: ELEMENT_SIZE - strokeWidth * 2 - 8,
-                            color: strokeColor,
+                            color: fill === "solid" ? (theme.background || "#fff") : strokeColor,
                             fontSize: "14px",
                             fontFamily: "var(--tl-font-mono)",
                             textAlign: "center",
@@ -344,6 +394,8 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                             padding: "4px",
                             overflow: "hidden",
                             wordBreak: "break-word",
+                            position: "relative",
+                            zIndex: 1,
                         }}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
