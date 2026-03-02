@@ -22,6 +22,10 @@ import {
     useEditor,
     useValue,
     TLRichText,
+    RichTextArea,
+    renderHtmlFromRichText,
+    useEditableRichText,
+    preventDefault,
 } from "tldraw"
 
 import {
@@ -30,7 +34,7 @@ import {
     CONTAINER_TYPE,
 } from "./ContainerShapeUtil"
 import { LayoutBinding } from "./LayoutBindingUtil"
-import { useEditableRichText } from "tldraw"
+import React, { useMemo } from "react"
 
 const LAYOUT_TYPE = "layout"
 const ELEMENT_TYPE = "element"
@@ -268,25 +272,34 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
 function ElementComponent({ shape }: { shape: ElementShape }) {
     const editor = useEditor()
     const theme = useDefaultColorTheme()
-    const isEditing = editor.getEditingShapeId() === shape.id
+
+    // 使用 useValue 來 reactively 追蹤編輯狀態
+    const isEditing = useValue(
+        "isEditing",
+        () => editor.getEditingShapeId() === shape.id,
+        [editor, shape.id]
+    )
+
+    const isSelected = useValue(
+        "isSelected",
+        () => editor.getSelectedShapeIds().includes(shape.id),
+        [editor, shape.id]
+    )
 
     // 計算此 element 在容器中的 0-based 陣列索引
     const arrayIndex = useValue(
         "element array index",
         () => {
-            // 找到指向此 shape 的 layout binding
             const bindings = editor.getBindingsToShape<LayoutBinding>(shape, LAYOUT_TYPE)
             if (bindings.length === 0) return -1
 
             const binding = bindings[0]
             const containerId = binding.fromId
 
-            // 取得容器的所有 layout bindings，按 index 排序
             const allBindings = editor
                 .getBindingsFromShape<LayoutBinding>(containerId as any, LAYOUT_TYPE)
                 .sort((a, b) => (a.props.index > b.props.index ? 1 : -1))
 
-            // 找出此 shape 在排序後的位置（0-based）
             return allBindings.findIndex((b) => b.toId === shape.id)
         },
         [editor, shape.id]
@@ -310,11 +323,6 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
     const strokeColor = solidColor
     const strokeWidth = STROKE_SIZES[size]
 
-    // 根據四種填充樣式決定背景
-    // none: 透明
-    // semi: 使用主題的 semi 色（半透明淺色）
-    // solid: 使用主題的 solid 色（實心色，與邊框同色）
-    // pattern: 使用主題的 semi 色作為底色 + 交叉線圖案（使用 pattern 色）
     let bgColor = "transparent"
     const showPattern = fill === "pattern"
 
@@ -325,17 +333,32 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
     } else if (fill === "pattern") {
         bgColor = semiColor || "rgba(0,0,0,0.1)"
     }
-    // fill === "none" → transparent
 
     const patternId = `pattern-${shape.id}`
 
+    // 使用 tldraw 的 useEditableRichText hook（內建 isEditing 等 reactive 狀態）
     const {
         rInput,
         isEmpty,
         handleFocus,
         handleBlur,
         handleKeyDown,
+        handleChange,
+        handleInputPointerDown,
+        handleDoubleClick,
+        handlePaste,
+        isReadyForEditing,
     } = useEditableRichText(shape.id, ELEMENT_TYPE, richText)
+
+    // 渲染靜態 HTML（非編輯模式時顯示）
+    const html = useMemo(() => {
+        if (richText) {
+            return renderHtmlFromRichText(editor, richText)
+        }
+        return ""
+    }, [editor, richText])
+
+    const textColor = fill === "solid" ? (theme.background || "#fff") : strokeColor
 
     return (
         <HTMLContainer
@@ -417,33 +440,74 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                         />
                     </svg>
                 )}
-                {(isEditing || !isEmpty) && (
+                {/* 文字區域 — 使用 tldraw 的 RichTextLabel 模式 */}
+                {(!isEmpty || isEditing) && (
                     <div
-                        ref={rInput as any}
-                        className="tl-rich-text"
+                        className="tl-text-label tl-text-wrapper tl-rich-text-wrapper"
+                        data-hastext={!isEmpty}
+                        data-isediting={isEditing}
+                        data-isselected={isSelected}
                         style={{
-                            width: ELEMENT_SIZE - strokeWidth * 2 - 8,
-                            height: ELEMENT_SIZE - strokeWidth * 2 - 8,
-                            color: fill === "solid" ? (theme.background || "#fff") : strokeColor,
-                            fontSize: "14px",
-                            fontFamily: "var(--tl-font-mono)",
-                            textAlign: "center",
+                            position: "absolute",
+                            inset: strokeWidth,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            outline: "none",
-                            pointerEvents: isEditing ? "all" : "none",
-                            userSelect: isEditing ? "text" : "none",
-                            padding: "4px",
                             overflow: "hidden",
-                            wordBreak: "break-word",
-                            position: "relative",
                             zIndex: 1,
                         }}
-                        onFocus={handleFocus}
-                        onBlur={handleBlur}
-                        onKeyDown={handleKeyDown as any}
-                    />
+                    >
+                        <div
+                            className="tl-text-label__inner tl-text-content__wrapper"
+                            style={{
+                                fontSize: "14px",
+                                lineHeight: "1.35",
+                                minHeight: "19px",
+                                color: textColor,
+                                fontFamily: "var(--tl-font-mono)",
+                                width: "100%",
+                                textAlign: "center",
+                            }}
+                        >
+                            {/* 靜態 HTML 渲染（非編輯模式） */}
+                            <div
+                                className="tl-text tl-text-content"
+                                dir="auto"
+                            >
+                                {richText && (
+                                    <div
+                                        className="tl-rich-text"
+                                        dangerouslySetInnerHTML={{ __html: html || "" }}
+                                        onPointerDown={(e: React.PointerEvent) => {
+                                            // 防止連結點擊時的事件傳播
+                                            if (
+                                                e.target instanceof HTMLElement &&
+                                                (e.target.tagName === "A" || e.target.closest("a"))
+                                            ) {
+                                                preventDefault(e as any)
+                                            }
+                                        }}
+                                    />
+                                )}
+                            </div>
+                            {/* TipTap 富文字編輯器（編輯模式） */}
+                            {(isReadyForEditing || isSelected) && (
+                                <RichTextArea
+                                    ref={rInput}
+                                    richText={richText}
+                                    isEditing={isEditing}
+                                    shapeId={shape.id}
+                                    handleFocus={handleFocus}
+                                    handleChange={handleChange}
+                                    handleBlur={handleBlur}
+                                    handleKeyDown={handleKeyDown}
+                                    handleDoubleClick={handleDoubleClick}
+                                    handlePaste={handlePaste}
+                                    handleInputPointerDown={handleInputPointerDown}
+                                />
+                            )}
+                        </div>
+                    </div>
                 )}
             </div>
         </HTMLContainer>
