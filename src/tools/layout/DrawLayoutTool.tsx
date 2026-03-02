@@ -58,7 +58,7 @@ export class DrawLayout extends StateNode {
                 CONTAINER_PADDING +
                 newIndex * (ELEMENT_SIZE + CONTAINER_PADDING),
             y: container.y + CONTAINER_PADDING,
-            props: { fill: "semi" },
+            props: { color: "black", fill: "semi", dash: "solid", size: "m", font: "mono" },
         })
 
         // 建立佈局綁定
@@ -100,7 +100,7 @@ export class DrawLayout extends StateNode {
             type: "element",
             x: currentPagePoint.x + CONTAINER_PADDING,
             y: currentPagePoint.y + CONTAINER_PADDING,
-            props: { fill: "semi" },
+            props: { color: "black", fill: "semi", dash: "solid", size: "m", font: "mono" },
         })
 
         // 建立綁定
