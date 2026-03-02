@@ -449,7 +449,7 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                         data-isselected={isSelected}
                         style={{
                             position: "absolute",
-                            inset: strokeWidth,
+                            inset: 0,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
