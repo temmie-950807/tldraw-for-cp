@@ -2,6 +2,8 @@ import {
     DefaultColorStyle,
     DefaultDashStyle,
     DefaultFillStyle,
+    DefaultFontStyle,
+    DefaultFontFamilies,
     DefaultSizeStyle,
     HTMLContainer,
     IndexKey,
@@ -12,6 +14,7 @@ import {
     TLDefaultColorStyle,
     TLDefaultDashStyle,
     TLDefaultFillStyle,
+    TLDefaultFontStyle,
     TLDefaultSizeStyle,
     TLShapeUtilCanBindOpts,
     Vec,
@@ -54,6 +57,7 @@ export type ElementShape = TLBaseShape<
         fill: TLDefaultFillStyle
         dash: TLDefaultDashStyle
         size: TLDefaultSizeStyle
+        font: TLDefaultFontStyle
         richText: TLRichText
     }
 >
@@ -66,6 +70,7 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
         fill: DefaultFillStyle,
         dash: DefaultDashStyle,
         size: DefaultSizeStyle,
+        font: DefaultFontStyle,
         richText: {
             validate: (value: any) => value,
         } as any,
@@ -77,6 +82,7 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
             fill: "none",
             dash: "solid",
             size: "m",
+            font: "mono",
             richText: { type: "doc", content: [] },
         }
     }
@@ -305,7 +311,7 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
         [editor, shape.id]
     )
 
-    const { color, fill, dash, size, richText } = shape.props
+    const { color, fill, dash, size, font, richText } = shape.props
 
     const themeColor = theme[color as keyof typeof theme]
     const semiColor =
@@ -464,7 +470,7 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                                 lineHeight: "1.35",
                                 minHeight: "19px",
                                 color: textColor,
-                                fontFamily: "var(--tl-font-mono)",
+                                fontFamily: DefaultFontFamilies[font],
                                 width: "100%",
                                 textAlign: "center",
                             }}
