@@ -292,12 +292,12 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
         [editor, shape.id]
     )
 
-    // 計算此 element 在容器中的 0-based 陣列索引
+    // 計算此 element 在容器中的顯示索引（含 indexOffset）
     const arrayIndex = useValue(
         "element array index",
         () => {
             const bindings = editor.getBindingsToShape<LayoutBinding>(shape, LAYOUT_TYPE)
-            if (bindings.length === 0) return -1
+            if (bindings.length === 0) return null
 
             const binding = bindings[0]
             const containerId = binding.fromId
@@ -306,7 +306,14 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                 .getBindingsFromShape<LayoutBinding>(containerId as any, LAYOUT_TYPE)
                 .sort((a, b) => (a.props.index > b.props.index ? 1 : -1))
 
-            return allBindings.findIndex((b) => b.toId === shape.id)
+            const position = allBindings.findIndex((b) => b.toId === shape.id)
+            if (position === -1) return null
+
+            // 讀取 container 的 indexOffset
+            const container = editor.getShape<ContainerShape>(containerId as any)
+            const offset = container?.props.indexOffset ?? 0
+
+            return position + offset
         },
         [editor, shape.id]
     )
@@ -375,8 +382,8 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                 overflow: "visible",
             }}
         >
-            {/* 0-based 陣列索引標籤 — 顯示在方塊左上角外側 */}
-            {arrayIndex >= 0 && (
+            {/* 陣列索引標籤 — 顯示在方塊左上角外側 */}
+            {arrayIndex !== null && (
                 <div
                     style={{
                         position: "absolute",

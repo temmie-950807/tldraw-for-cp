@@ -10,6 +10,7 @@ import {
     useIsToolSelected,
     useTools,
 } from "tldraw"
+import { CustomStylePanel } from "./CustomStylePanel"
 
 export const uiOverrides: TLUiOverrides = {
     //[a]
@@ -91,6 +92,7 @@ export const uiOverrides: TLUiOverrides = {
 }
 
 export const components: TLComponents = {
+    StylePanel: CustomStylePanel,
     Toolbar: (props) => {
         const tools = useTools()
         const isArraySelected = useIsToolSelected(tools["array"])

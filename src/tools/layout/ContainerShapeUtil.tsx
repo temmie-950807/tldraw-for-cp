@@ -13,7 +13,7 @@ export const CONTAINER_PADDING = 24
 
 export type ContainerShape = TLBaseShape<
     typeof CONTAINER_TYPE,
-    { height: number; width: number }
+    { height: number; width: number; indexOffset: number }
 >
 
 export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
@@ -22,12 +22,14 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
     static override props: RecordProps<ContainerShape> = {
         height: T.number,
         width: T.number,
+        indexOffset: T.number,
     }
 
     override getDefaultProps() {
         return {
             width: 100 + CONTAINER_PADDING * 2,
             height: 100 + CONTAINER_PADDING * 2,
+            indexOffset: 0,
         }
     }
 
