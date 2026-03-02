@@ -79,7 +79,7 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
     override getDefaultProps(): ElementShape["props"] {
         return {
             color: "black",
-            fill: "none",
+            fill: "semi",
             dash: "solid",
             size: "m",
             font: "mono",
