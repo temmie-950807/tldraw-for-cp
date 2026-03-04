@@ -371,7 +371,7 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
         return ""
     }, [editor, richText])
 
-    const textColor = fill === "solid" ? (theme.background || "#fff") : strokeColor
+    const textColor = solidColor
 
     return (
         <HTMLContainer
