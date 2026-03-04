@@ -1,4 +1,5 @@
 import {
+    DefaultFontStyle,
     HTMLContainer,
     IndexKey,
     RecordProps,
@@ -6,6 +7,7 @@ import {
     ShapeUtil,
     T,
     TLBaseShape,
+    TLDefaultFontStyle,
     TLShapeUtilCanBindOpts,
     createBindingId,
     createShapeId,
@@ -23,7 +25,7 @@ export const CONTAINER_PADDING = 24
 
 export type ContainerShape = TLBaseShape<
     typeof CONTAINER_TYPE,
-    { height: number; width: number; indexOffset: number; splitBySpace: boolean; inputText: string }
+    { height: number; width: number; indexOffset: number; splitBySpace: boolean; inputText: string; font: TLDefaultFontStyle }
 >
 
 export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
@@ -35,6 +37,7 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
         indexOffset: T.number,
         splitBySpace: T.boolean,
         inputText: T.string,
+        font: DefaultFontStyle,
     }
 
     override getDefaultProps() {
@@ -44,6 +47,7 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
             indexOffset: 0,
             splitBySpace: false,
             inputText: "",
+            font: "mono" as TLDefaultFontStyle,
         }
     }
 

@@ -292,8 +292,8 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
         [editor, shape.id]
     )
 
-    // 計算此 element 在容器中的顯示索引（含 indexOffset）
-    const arrayIndex = useValue(
+    // 計算此 element 在容器中的顯示索引（含 indexOffset）及容器字型
+    const containerInfo = useValue(
         "element array index",
         () => {
             const bindings = editor.getBindingsToShape<LayoutBinding>(shape, LAYOUT_TYPE)
@@ -309,11 +309,12 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
             const position = allBindings.findIndex((b) => b.toId === shape.id)
             if (position === -1) return null
 
-            // 讀取 container 的 indexOffset
+            // 讀取 container 的 indexOffset 和 font
             const container = editor.getShape<ContainerShape>(containerId as any)
             const offset = container?.props.indexOffset ?? 0
+            const containerFont = container?.props.font ?? "mono"
 
-            return position + offset
+            return { index: position + offset, font: containerFont }
         },
         [editor, shape.id]
     )
@@ -383,14 +384,14 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
             }}
         >
             {/* 陣列索引標籤 — 顯示在方塊左上角外側 */}
-            {arrayIndex !== null && (
+            {containerInfo !== null && (
                 <div
                     style={{
                         position: "absolute",
                         top: -20,
                         left: 0,
                         fontSize: "12px",
-                        fontFamily: "var(--tl-font-mono)",
+                        fontFamily: DefaultFontFamilies[containerInfo.font],
                         color: theme.text,
                         lineHeight: "16px",
                         pointerEvents: "none",
@@ -398,7 +399,7 @@ function ElementComponent({ shape }: { shape: ElementShape }) {
                         whiteSpace: "nowrap",
                     }}
                 >
-                    {arrayIndex}
+                    {containerInfo.index}
                 </div>
             )}
             <div
