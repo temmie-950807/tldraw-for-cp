@@ -69,7 +69,23 @@ export class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
             .getBindingsFromShape<LayoutBinding>(container, LAYOUT_TYPE)
             .sort((a, b) => (a.props.index > b.props.index ? 1 : -1))
 
-        if (bindings.length === 0) return
+        if (bindings.length === 0) {
+            // 沒有元素時，視作有 1 個元素來計算容器尺寸
+            const width = CONTAINER_PADDING + ELEMENT_SIZE + CONTAINER_PADDING
+            const height = CONTAINER_PADDING + ELEMENT_SIZE + CONTAINER_PADDING
+
+            if (
+                width !== container.props.width ||
+                height !== container.props.height
+            ) {
+                this.editor.updateShape({
+                    id: container.id,
+                    type: CONTAINER_TYPE,
+                    props: { width, height },
+                })
+            }
+            return
+        }
 
         for (let i = 0; i < bindings.length; i++) {
             const binding = bindings[i]
